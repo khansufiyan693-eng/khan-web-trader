@@ -9,18 +9,15 @@
         body { margin: 0; padding: 0; background-color: #0B0E14; color: #EAECEF; }
         .app { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; height: 100vh; background: #12161F; position: relative; }
         
-        /* Top Search Bar (Angel One Style) */
         .header-top { background: #181D27; padding: 12px 14px; border-bottom: 1px solid #262D3D; display: flex; align-items: center; gap: 10px; }
         .search-box { flex: 1; background: #12161F; border: 1px solid #2B3139; border-radius: 8px; display: flex; align-items: center; padding: 8px 12px; }
         .search-box input { background: transparent; border: none; color: #FFF; font-size: 13px; width: 100%; outline: none; }
         
-        /* Top Horizontal Category Tabs */
         .cat-scroll { display: flex; background: #181D27; overflow-x: auto; padding: 0 10px 8px 10px; gap: 16px; border-bottom: 1px solid #262D3D; white-space: nowrap; scrollbar-width: none; }
         .cat-scroll::-webkit-scrollbar { display: none; }
         .cat-item { font-size: 13px; font-weight: 600; color: #848E9C; cursor: pointer; padding-bottom: 4px; }
         .cat-item.active { color: #3861FB; border-bottom: 2px solid #3861FB; }
 
-        /* Index Ticker Scroll */
         .ticker-scroll { display: flex; background: #181D27; padding: 10px 14px; gap: 14px; overflow-x: auto; border-bottom: 1px solid #262D3D; scrollbar-width: none; }
         .ticker-card { background: #151A24; padding: 8px 12px; border-radius: 6px; min-width: 140px; border: 1px solid #262D3D; cursor: pointer; flex-shrink: 0; }
         .ticker-title { font-size: 10px; color: #848E9C; font-weight: 700; display: flex; justify-content: space-between; }
@@ -28,14 +25,10 @@
         .up { color: #0ECB81; }
         .down { color: #F6465D; }
 
-        /* Main Screen Container */
         .main { flex: 1; overflow-y: auto; padding-bottom: 75px; }
-
-        /* Sections & Cards */
         .section-title { padding: 14px 14px 6px 14px; font-size: 13px; font-weight: 700; color: #848E9C; display: flex; justify-content: space-between; align-items: center; }
         .banner-card { background: linear-gradient(135deg, #1E232F, #181D27); margin: 10px 14px; padding: 14px; border-radius: 10px; border: 1px solid #2B3139; display: flex; justify-content: space-between; align-items: center; }
         
-        /* Watchlist / Stock Item */
         .stock-row { padding: 12px 14px; border-bottom: 1px solid #1E232F; display: flex; justify-content: space-between; align-items: center; background: #12161F; }
         .stock-row:active { background: #181D27; }
         .s-name { font-size: 14px; font-weight: 700; }
@@ -44,20 +37,17 @@
         .s-ltp { font-size: 14px; font-weight: 700; }
         .s-chg { font-size: 11px; margin-top: 2px; }
 
-        /* Buttons */
         .btn { border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; color: #FFF; }
         .btn-blue { background: #3861FB; }
         .btn-green { background: #0ECB81; color: #000; }
         .btn-red { background: #F6465D; }
         .btn-gray { background: #2B3139; color: #EAECEF; }
 
-        /* Bottom Navigation Bar (Angel Exact) */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #181D27; border-top: 1px solid #262D3D; display: flex; z-index: 40; }
         .nav-item { flex: 1; padding: 8px 0; text-align: center; color: #848E9C; font-size: 10px; font-weight: 600; cursor: pointer; }
         .nav-item.active { color: #3861FB; }
         .nav-icon { font-size: 18px; display: block; margin-bottom: 2px; }
 
-        /* Order Bottom Sheet Drawer */
         .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; justify-content: flex-end; flex-direction: column; }
         .drawer { background: #181D27; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 20px; max-width: 480px; width: 100%; margin: 0 auto; border-top: 1px solid #2B3139; }
         .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #262D3D; padding-bottom: 12px; margin-bottom: 14px; }
@@ -68,7 +58,6 @@
 <body>
 
 <div class="app">
-    <!-- Top Search Header -->
     <div class="header-top">
         <div class="search-box">
             <span style="margin-right:8px; color:#848E9C;">🔍</span>
@@ -77,38 +66,34 @@
         <div style="font-size:20px; cursor:pointer;" onclick="setTab('account')">👤</div>
     </div>
 
-    <!-- Category Scroll -->
     <div class="cat-scroll">
-        <div class="cat-item active" onclick="alert('Stocks Tab Active')">Stocks</div>
+        <div class="cat-item active" onclick="setTab('home')">Stocks</div>
         <div class="cat-item" onclick="setTab('options')">F&O</div>
         <div class="cat-item" onclick="setTab('portfolio')">Mutual Funds</div>
-        <div class="cat-item" onclick="alert('Loans Section')">Loans</div>
-        <div class="cat-item" onclick="alert('Commodity Section')">Commodity</div>
+        <div class="cat-item" onclick="alert('Loans Section Active')">Loans</div>
+        <div class="cat-item" onclick="alert('Commodity Section Active')">Commodity</div>
     </div>
 
-    <!-- Market Indices Ticker -->
     <div class="ticker-scroll">
-        <div class="ticker-card" onclick="openIndexModal('NIFTY 50', niftyPrice)">
+        <div class="ticker-card" onclick="setTab('options')">
             <div class="ticker-title"><span>NIFTY 50</span><span style="color:#0ECB81;">Live</span></div>
             <div id="tkNifty" class="ticker-val up">25,144.30</div>
             <div style="font-size:10px; color:#F6465D; margin-top:2px;">-155.05 (-0.61%)</div>
         </div>
-        <div class="ticker-card" onclick="openIndexModal('SENSEX', sensexPrice)">
+        <div class="ticker-card" onclick="setTab('options')">
             <div class="ticker-title"><span>SENSEX</span><span style="color:#0ECB81;">Live</span></div>
             <div id="tkSensex" class="ticker-val up">81,592.45</div>
             <div style="font-size:10px; color:#F6465D; margin-top:2px;">-318.56 (-0.39%)</div>
         </div>
-        <div class="ticker-card" onclick="openIndexModal('BANKNIFTY', bankNifty)">
+        <div class="ticker-card" onclick="setTab('options')">
             <div class="ticker-title"><span>BANKNIFTY</span><span style="color:#0ECB81;">Live</span></div>
             <div id="tkBank" class="ticker-val up">51,420.10</div>
             <div style="font-size:10px; color:#0ECB81; margin-top:2px;">+112.40 (+0.22%)</div>
         </div>
     </div>
 
-    <!-- Main Dynamic Screen Content -->
     <div class="main" id="mainScreen"></div>
 
-    <!-- Bottom Navigation Bar -->
     <div class="bottom-nav">
         <div class="nav-item active" id="nav-home" onclick="setTab('home')"><span class="nav-icon">🏠</span>HOME</div>
         <div class="nav-item" id="nav-watchlist" onclick="setTab('watchlist')"><span class="nav-icon">⭐</span>WATCHLIST</div>
@@ -118,7 +103,6 @@
     </div>
 </div>
 
-<!-- Order Execution Drawer -->
 <div class="drawer-overlay" id="orderDrawer">
     <div class="drawer">
         <div class="drawer-header">
@@ -157,7 +141,6 @@
     let searchTerm = '';
     let selectedContract = null;
 
-    // Comprehensive BSE & NSE Master Stocks Database
     let allStocks = [
         { sym: 'RELIANCE', exch: 'NSE EQ', price: 2985.50, base: 2950 },
         { sym: 'TCS', exch: 'NSE EQ', price: 3920.00, base: 3900 },
@@ -185,7 +168,6 @@
         { sym: 'PCJEWELLER', exch: 'NSE EQ', price: 15.50, base: 15.9 }
     ];
 
-    // Live Tick Simulation
     setInterval(() => {
         niftyPrice = +(niftyPrice + (Math.random() - 0.48) * 12).toFixed(2);
         sensexPrice = +(sensexPrice + (Math.random() - 0.48) * 35).toFixed(2);
@@ -199,13 +181,11 @@
             s.price = +(s.price * (1 + (Math.random() - 0.49) * 0.004)).toFixed(2);
         });
 
-        // Update Portfolio Live MTM
         portfolioPositions.forEach(p => {
             let found = allStocks.find(x => x.sym === p.sym);
             if (found) p.ltp = found.price;
         });
 
-        // Run Single Share AI Algos (Min ₹1,000 auto deployment)
         aiAlgos.forEach(a => {
             if (a.active && Math.random() < 0.12) {
                 let st = allStocks.find(x => x.sym === a.sym);
@@ -219,7 +199,7 @@
                         qty: qty,
                         avg: st.price,
                         ltp: st.price,
-                        source: 'AI Algo (' + st.sym + ')'
+                        source: 'AI Algo'
                     });
                 }
             }
@@ -311,10 +291,6 @@
         setTab('watchlist');
     }
 
-    function openIndexModal(idxName, price) {
-        openOrderDrawer(idxName, price / 200); // Option style scaling
-    }
-
     function renderScreen() {
         let screen = document.getElementById('mainScreen');
         let filtered = allStocks.filter(s => s.sym.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -331,7 +307,6 @@
 
                 <div class="section-title"><span>Stocks You're Interested In</span><span style="color:#3861FB; font-size:11px;" onclick="setTab('watchlist')">View All ></span></div>
             `;
-            // Show top 3 featured
             for (let i = 0; i < 3 && i < filtered.length; i++) {
                 let s = filtered[i];
                 let diff = +(s.price - s.base).toFixed(2);
@@ -386,4 +361,19 @@
                             <div class="s-sub">${s.exch} • Tap to Trade</div>
                         </div>
                         <div class="s-price-col" onclick="openOrderDrawer('${s.sym}', ${s.price})" style="margin-right:12px; cursor:pointer;">
-                
+                            <div class="s-ltp ${isUp ? 'up' : 'down'}">₹ ${s.price.toLocaleString('en-IN')}</div>
+                            <div class="s-chg ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${diff} (${pct}%)</div>
+                        </div>
+                        <button class="btn ${algoActive ? 'btn-red' : 'btn-blue'}" style="padding:5px 8px; font-size:10px;" onclick="toggleStockAlgo('${s.sym}')">${algoActive ? 'Stop Algo' : '+ AI Algo'}</button>
+                    </div>
+                `;
+            });
+            screen.innerHTML = h;
+
+        } else if (currentTab === 'options') {
+            let atm = Math.round(niftyPrice / 50) * 50;
+            let strikes = [atm-100, atm-50, atm, atm+50, atm+100];
+            let h = `
+                <div style="padding:14px; background:#181D27; font-weight:700; border-bottom:1px solid #262D3D; display:flex; justify-content:space-between;">
+                    <span>NIFTY OPTION CHAIN (F&O)</span>
+    
