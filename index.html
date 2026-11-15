@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KHAN AI TRADER - Live Paper Trading</title>
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0; padding: 0;
+            background-color: #0D1117; color: #F0F6FC;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .app-container {
+            max-width: 480px; margin: 0 auto;
+            display: flex; flex-direction: column; height: 100vh;
+            background-color: #161B22;
+        }
+        /* Header */
+        .header {
+            padding: 16px; background-color: #1F242D;
+            border-bottom: 1px solid #30363D;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .brand { font-size: 18px; font-weight: 800; color: #58A6FF; letter-spacing: 0.5px; }
+        .live-badge {
+            display: inline-block; width: 8px; height: 8px;
+            background-color: #3FB950; border-radius: 50%; margin-right: 6px;
+            animation: blink 1.2s infinite;
+        }
+        @keyframes blink { 50% { opacity: 0.3; } }
+        .wallet-box { text-align: right; }
+        .wallet-label { font-size: 11px; color: #8B949E; }
+        .wallet-amount { font-size: 16px; font-weight: 700; color: #3FB950; }
+
+        /* Content Area */
+        .content {
+            flex: 1; padding: 14px; overflow-y: auto; padding-bottom: 85px;
+        }
+        .summary-banner {
+            background: linear-gradient(135deg, #1F2937, #111827);
+            padding: 14px; border-radius: 12px; margin-bottom: 16px;
+            border: 1px solid #30363D; display: flex; justify-content: space-between;
+        }
+        .summary-item div:first-child { font-size: 12px; color: #8B949E; }
+        .summary-item div:last-child { font-size: 17px; font-weight: bold; margin-top: 4px; }
+
+        .section-title {
+            font-size: 13px; color: #8B949E; text-transform: uppercase;
+            letter-spacing: 0.8px; margin-bottom: 10px; font-weight: 600;
+        }
+
+        /* Stock Card */
+        .card {
+            background-color: #21262D; padding: 14px; border-radius: 12px;
+            margin-bottom: 12px; border: 1px solid #30363D;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .stock-info { flex: 1; }
+        .stock-name { font-size: 16px; font-weight: 700; color: #FFF; }
+        .stock-price { font-size: 15px; font-weight: 600; margin-top: 4px; transition: color 0.3s; }
+        .price-up { color: #3FB950; }
+        .price-down { color: #F85149; }
+        .stock-change { font-size: 12px; margin-left: 6px; }
+
+        .btn-group { display: flex; gap: 8px; }
+        .btn {
+            padding: 10px 14px; border-radius: 8px; border: none;
+            font-weight: 700; font-size: 13px; cursor: pointer; color: #FFF;
+        }
+        .btn-buy { background-color: #238636; }
+        .btn-buy:active { background-color: #2EA043; }
+        .btn-sell { background-color: #DA3633; }
+        .btn-algo { background-color: #1F6FEB; }
+        .btn-algo.active { background-color: #8957E5; }
+
+        /* Modal for Buy */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.75); justify-content: center; align-items: center; z-index: 100;
+        }
+        .modal {
+            background: #21262D; padding: 20px; border-radius: 14px; width: 90%; max-width: 360px;
+            border: 1px solid #30363D;
+        }
+        .modal h3 { margin: 0 0 10px 0; font-size: 18px; }
+        .qty-controls { display: flex; align-items: center; justify-content: space-between; margin: 16px 0; }
+        .qty-btn {
+            width: 40px; height: 40px; border-radius: 8px; border: 1px solid #30363D;
+            background: #161B22; color: #FFF; font-size: 20px; font-weight: bold;
+        }
+        .qty-val { font-size: 20px; font-weight: bold; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+        .modal-actions button { flex: 1; padding: 12px; font-size: 15px; }
+
+        /* Bottom Navigation */
+        .nav-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto;
+            display: flex; background-color: #1F242D; border-top: 1px solid #30363D;
+        }
+        .nav-item {
+            flex: 1; padding: 14px 0; text-align: center; color: #8B949E;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+        }
+        .nav-item.active { color: #58A6FF; border-top: 2px solid #58A6FF; }
+        .empty-msg { text-align: center; color: #8B949E; margin-top: 40px; font-size: 14px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Top Header -->
+    <div class="header">
+        <div>
+            <div class="brand"><span class="live-badge"></span>KHAN AI TRADER</div>
+            <div style="font-size: 11px; color: #8B949E;">Live Paper Trading Mode</div>
+        </div>
+        <div class="wallet-box">
+            <div class="wallet-label">Available Cash</div>
+            <div class="wallet-amount" id="cashDisplay">₹ 1,00,000</div>
+        </div>
+    </div>
+
+    <!-- Main Screen -->
+    <div class="content" id="mainScreen"></div>
+
+    <!-- Bottom Navigation -->
+    <div class="nav-bar">
+        <div class="nav-item active" id="tab-market" onclick="switchTab('market')">📊 Live Market</div>
+        <div class="nav-item" id="tab-portfolio" onclick="switchTab('portfolio')">💼 My Trades (<span id="tradeCount">0</span>)</div>
+        <div class="nav-item" id="tab-wallet" onclick="switchTab('wallet')">⚙️ Account</div>
+    </div>
+</div>
+
+<!-- Buy Order Popup -->
+<div class="modal-overlay" id="buyModal">
+    <div class="modal">
+        <h3 id="modalStockName">Buy Stock</h3>
+        <div style="color: #8B949E; font-size: 14px;">Live Price: <strong style="color:#FFF;" id="modalStockPrice">₹ 0</strong></div>
+        
+        <div class="qty-controls">
+            <button class="qty-btn" onclick="changeQty(-1)">-</button>
+            <div class="qty-val"><span id="modalQty">1</span> Qty</div>
+            <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; font-size:14px; background:#161B22; padding:10px; border-radius:8px;">
+            <span>Total Required:</span>
+            <strong id="modalTotalCost" style="color:#3FB950;">₹ 0</strong>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn" style="background:#30363D;" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-buy" onclick="confirmBuy()">Confirm Buy</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentTab = 'market';
+    let cash = 100000;
+    let holdings = [];
+    let selectedStock = null;
+    let orderQty = 1;
+
+    let stocks = [
+        { id: 'nifty', name: 'NIFTY 50 (Lot)', price: 22450.00, prevPrice: 22450.00, aiAuto: false },
+        { id: 'banknifty', name: 'BANK NIFTY', price: 47820.50, prevPrice: 47820.50, aiAuto: false },
+        { id: 'reliance', name: 'RELIANCE', price: 2985.00, prevPrice: 2985.00, aiAuto: false },
+        { id: 'tatamotors', name: 'TATA MOTORS', price: 982.40, prevPrice: 982.40, aiAuto: false },
+        { id: 'hdfcbank', name: 'HDFC BANK', price: 1540.75, prevPrice: 1540.75, aiAuto: false },
+        { id: 'suzlon', name: 'SUZLON ENERGY', price: 46.20, prevPrice: 46.20, aiAuto: false }
+    ];
+
+    // Simulate Live Market Ticks every 2 seconds
+    setInterval(() => {
+        stocks.forEach(s => {
+            s.prevPrice = s.price;
+            // Random fluctuation between -0.35% and +0.35%
+            const changePercent = (Math.random() - 0.49) * 0.007;
+            s.price = +(s.price * (1 + changePercent)).toFixed(2);
+        });
+
+        if (selectedStock) {
+            updateModalUI();
+        }
+        render();
+    }, 2000);
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
+        render();
+    }
+
+    function openBuyModal(stockId) {
+        selectedStock = stocks.find(s => s.id === stockId);
+        orderQty = 1;
+        updateModalUI();
+        document.getElementById('buyModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('buyModal').style.display = 'none';
+        selectedStock = null;
+    }
+
+    function changeQty(delta) {
+        if (orderQty + delta >= 1) {
+            orderQty += delta;
+            updateModalUI();
+        }
+    }
+
+    function updateModalUI() {
+        if (!selectedStock) return;
+        document.getElementById('modalStockName').innerText = 'Buy ' + selectedStock.name;
+        document.getElementById('modalStockPrice').innerText = '₹ ' + selectedStock.price.toLocaleString('en-IN');
+        document.getElementById('modalQty').innerText = orderQty;
+        const total = +(selectedStock.price * orderQty).toFixed(2);
+        document.getElementById('modalTotalCost').innerText = '₹ ' + total.toLocaleString('en-IN');
+    }
+
+    function confirmBuy() {
+        const totalCost = +(selectedStock.price * orderQty).toFixed(2);
+        if (totalCost > cash) {
+            alert('Available Cash kam hai! Quantity kam karein ya Account tab se funds add karein.');
+            return;
+        }
+        cash = +(cash - totalCost).toFixed(2);
+
+        const existing = holdings.find(h => h.id === selectedStock.id);
+        if (existing) {
+            const totalQty = existing.qty + orderQty;
+            existing.avgPrice = +(((existing.avgPrice * existing.qty) + totalCost) / totalQty).toFixed(2);
+            existing.qty = totalQty;
+        } else {
+            holdings.push({
+                id: selectedStock.id,
+                name: selectedStock.name,
+                qty: orderQty,
+                avgPrice: selectedStock.price
+            });
+        }
+
+        closeModal();
+        switchTab('portfolio');
+    }
+
+    function sellStock(stockId) {
+        const index = holdings.findIndex(h => h.id === stockId);
+        if (index === -1) return;
+
+        const holding = holdings[index];
+        const liveStock = stocks.find(s => s.id === stockId);
+        const sellValue = +(liveStock.price * holding.qty).toFixed(2);
+
+        cash = +(cash + sellValue).toFixed(2);
+        holdings.splice(index, 1);
+        render();
+    }
+
+    function toggleAI(stockId) {
+        const s = stocks.find(st => st.id === stockId);
+        s.aiAuto = !s.aiAuto;
+        if (s.aiAuto && cash >= s.price) {
+            // Auto buy 1 qty as AI trade
+            cash = +(cash - s.price).toFixed(2);
+            const existing = holdings.find(h => h.id === s.id);
+            if (existing) {
+                existing.avgPrice = +(((existing.avgPrice * existing.qty) + s.price) / (existing.qty + 1)).toFixed(2);
+                existing.qty += 1;
+            } else {
+                holdings.push({ id: s.id, name: s.name, qty: 1, avgPrice: s.price });
+            }
+        }
+        render();
+    }
+
+    function resetAccount() {
+        cash = 100000;
+        holdings = [];
+        stocks.forEach(s => s.aiAuto = false);
+        alert('Demo Account ₹1,00,000 par reset ho gaya hai!');
+        render();
+    }
+
+    function render() {
+        document.getElementById('cashDisplay').innerText = '₹ ' + cash.toLocaleString('en-IN');
+        document.getElementById('tradeCount').innerText = holdings.length;
+        const screen = document.getElementById('mainScreen');
+
+        // Calculate Total Live P&L
+        let totalInvested = 0;
+        let currentValue = 0;
+        holdings.forEach(h => {
+            const live = stocks.find(s => s.id === h.id);
+            totalInvested += h.avgPrice * h.qty;
+            currentValue += live.price * h.qty;
+        });
+        const totalPnL = +(currentValue - totalInvested).toFixed(2);
+        const pnlColor = totalPnL >= 0 ? '#3FB950' : '#F85149';
+        const pnlSign = totalPnL >= 0 ? '+' : '';
+
+        if (currentTab === 'market') {
+            let html = `
+                <div class="summary-banner">
+                    <div class="summary-item">
+                        <div>Live P&L</div>
+                        <div style="color: ${pnlColor}">${pnlSign}₹ ${totalPnL.toLocaleString('en-IN')}</div>
+                    </div>
+                    <div class="summary-item" style="text-align:right;">
+                        <div>Active Trades</div>
+                        <div>${holdings.length}</div>
+                    </div>
+                </div>
+                <div class="section-title">Live NSE Watchlist (Tap Buy to Trade)</div>
+            `;
+
+            stocks.forEach(s => {
+                const isUp = s.price >= s.prevPrice;
+                const diff = +(s.price - s.prevPrice).toFixed(2);
+                html += `
+                    <div class="card">
+                        <div class="stock-info">
+                            <div class="stock-name">${s.name}</div>
+                            <div class="stock-price ${isUp ? 'price-up' : 'price-down'}">
+                                ₹ ${s.price.toLocaleString('en-IN')}
+                                <span class="stock-change">${isUp ? '▲' : '▼'} ${Math.abs(diff)}</span>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-algo ${s.aiAuto ? 'active' : ''}" onclick="toggleAI('${s.id}')">
+                                ${s.aiAuto ? '🤖 AI ON' : '🤖 AI'}
+                            </button>
+                            <button class="btn btn-buy" onclick="openBuyModal('${s.id}')">BUY</button>
+                        </div>
+                    </div>
+                `;
+            });
+            screen.innerHTML = html;
+
+        } else if (currentTab === 'portfolio') {
+            let html = `
+                <div class="summary-banner">
+                    <div class="summary-item">
+                        <div>Invested</div>
+                        <div>₹ ${totalInvested.toLocaleString('en-IN')}</div>
+                    </div>
+                    <div class="summary-item" style="text-align:right;">
+                        <div>Total Live P&L</div>
+                        <div style="color: ${pnlColor}">${pnlSign}₹ ${totalPnL.toLocaleString('en-IN')}</div>
+                    </div>
+                </div>
+                <div class="section-title">Your Live Positions</div>
+            `;
+
+            if (holdings.length === 0) {
+                html += `<div class="empty-msg">Abhi koi active trade nahi hai.<br><b>Live Market</b> tab mein jakar kisi bhi stock par <b>BUY</b> dabayein!</div>`;
+            } else {
+                holdings.forEach(h => {
+                    const live = stocks.find(s => s.id === h.id);
+                    const pnl = +((live.price - h.avgPrice) * h.qty).toFixed(2);
+                    const isProfit = pnl >= 0;
+                    html += `
+                        <div class="card">
+                            <div class="stock-info">
+                                <div class="stock-name">${h.name} <span style="font-size:12px; color:#8B949E;">(${h.qty} Qty)</span></div>
+                                <div style="font-size:12px; color:#8B949E; margin-top:4px;">
+                                    Buy: ₹${h.avgPrice} | Live: <strong style="color:#FFF;">₹${live.price}</strong>
+                                </div>
+                                <div style="font-size:14px; font-weight:bold; margin-top:4px; color:${isProfit ? '#3FB950' : '#F85149'};">
+                                    P&L: ${isProfit ? '+' : ''}₹ ${pnl.toLocaleString('en-IN')}
+                                </div>
+                            </div>
+                            <button class="btn btn-sell" onclick="sellStock('${h.id}')">SELL</button>
+                        </div>
+                    `;
+                });
+            }
+            screen.innerHTML = html;
+
+        } else if (currentTab === 'wallet') {
+            screen.innerHTML = `
+                <div class="section-title">Paper Trading Account</div>
+                <div class="card" style="flex-direction:column; align-items:flex-start; gap:10px;">
+                    <div style="font-size:14px; color:#8B949E;">Virtual Trading Balance</div>
+                    <div style="font-size:26px; font-weight:bold; color:#3FB950;">₹ ${cash.toLocaleString('en-IN')}</div>
+                    <div style="font-size:12px; color:#8B949E;">Yeh 100% free virtual money hai trading seekhne aur practice karne ke liye.</div>
+                </div>
+                <button class="btn btn-algo" style="width:100%; padding:14px; font-size:15px; margin-top:10px;" onclick="resetAccount()">
+                    🔄 Reset Account to ₹1,00,000
+                </button>
+            `;
+        }
+    }
+
+    render();
+</script>
+</body>
+</html>
