@@ -3,255 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KHAN AI TRADER - Angel Pro</title>
+    <title>KHAN PRO TRADER - Live Terminal & Algo</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { margin: 0; padding: 0; background-color: #0B0E14; color: #EAECEF; }
         .app { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; height: 100vh; background: #12161F; position: relative; }
         
-        .header-top { background: #181D27; padding: 12px 14px; border-bottom: 1px solid #262D3D; display: flex; align-items: center; gap: 10px; }
-        .search-box { flex: 1; background: #12161F; border: 1px solid #2B3139; border-radius: 8px; display: flex; align-items: center; padding: 8px 12px; }
-        .search-box input { background: transparent; border: none; color: #FFF; font-size: 13px; width: 100%; outline: none; }
-        
-        .cat-scroll { display: flex; background: #181D27; overflow-x: auto; padding: 0 10px 8px 10px; gap: 16px; border-bottom: 1px solid #262D3D; white-space: nowrap; scrollbar-width: none; }
-        .cat-scroll::-webkit-scrollbar { display: none; }
-        .cat-item { font-size: 13px; font-weight: 600; color: #848E9C; cursor: pointer; padding-bottom: 4px; }
-        .cat-item.active { color: #3861FB; border-bottom: 2px solid #3861FB; }
+        /* Top Bar */
+        .top-bar { background: #181D27; padding: 10px 14px; border-bottom: 1px solid #262D3D; display: flex; justify-content: space-between; align-items: center; }
+        .idx-box { font-size: 11px; }
+        .up { color: #0ECB81; font-weight: 700; }
+        .down { color: #F6465D; font-weight: 700; }
 
-        .ticker-scroll { display: flex; background: #181D27; padding: 10px 14px; gap: 14px; overflow-x: auto; border-bottom: 1px solid #262D3D; scrollbar-width: none; }
-        .ticker-card { background: #151A24; padding: 8px 12px; border-radius: 6px; min-width: 140px; border: 1px solid #262D3D; cursor: pointer; flex-shrink: 0; }
-        .ticker-title { font-size: 10px; color: #848E9C; font-weight: 700; display: flex; justify-content: space-between; }
-        .ticker-val { font-size: 13px; font-weight: 700; margin-top: 3px; }
-        .up { color: #0ECB81; }
-        .down { color: #F6465D; }
+        /* Navigation Tabs */
+        .nav-tabs { display: flex; background: #181D27; border-bottom: 1px solid #262D3D; overflow-x: auto; }
+        .n-tab { padding: 10px 14px; font-size: 12px; font-weight: 700; color: #848E9C; cursor: pointer; white-space: nowrap; }
+        .n-tab.active { color: #3861FB; border-bottom: 2px solid #3861FB; }
 
-        .main { flex: 1; overflow-y: auto; padding-bottom: 75px; }
-        .section-title { padding: 14px 14px 6px 14px; font-size: 13px; font-weight: 700; color: #848E9C; display: flex; justify-content: space-between; align-items: center; }
-        .banner-card { background: linear-gradient(135deg, #1E232F, #181D27); margin: 10px 14px; padding: 14px; border-radius: 10px; border: 1px solid #2B3139; display: flex; justify-content: space-between; align-items: center; }
-        
-        .stock-row { padding: 12px 14px; border-bottom: 1px solid #1E232F; display: flex; justify-content: space-between; align-items: center; background: #12161F; }
-        .stock-row:active { background: #181D27; }
-        .s-name { font-size: 14px; font-weight: 700; }
-        .s-sub { font-size: 11px; color: #848E9C; margin-top: 2px; }
-        .s-price-col { text-align: right; }
-        .s-ltp { font-size: 14px; font-weight: 700; }
-        .s-chg { font-size: 11px; margin-top: 2px; }
+        /* Main Content */
+        .main { flex: 1; overflow-y: auto; padding-bottom: 70px; }
 
+        /* Search & Lists */
+        .search-box { padding: 10px 14px; background: #181D27; border-bottom: 1px solid #262D3D; }
+        .inp { width: 100%; background: #12161F; border: 1px solid #2B3139; color: #FFF; padding: 10px; border-radius: 6px; font-size: 13px; outline: none; }
+        .stock-item { padding: 12px 14px; border-bottom: 1px solid #1E232F; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .stock-item:active { background: #1A202C; }
+
+        /* Buttons */
         .btn { border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; color: #FFF; }
         .btn-blue { background: #3861FB; }
         .btn-green { background: #0ECB81; color: #000; }
         .btn-red { background: #F6465D; }
         .btn-gray { background: #2B3139; color: #EAECEF; }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #181D27; border-top: 1px solid #262D3D; display: flex; z-index: 40; }
-        .nav-item { flex: 1; padding: 8px 0; text-align: center; color: #848E9C; font-size: 10px; font-weight: 600; cursor: pointer; }
-        .nav-item.active { color: #3861FB; }
-        .nav-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+        /* Bottom Nav Bar */
+        .b-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #181D27; border-top: 1px solid #262D3D; display: flex; z-index: 50; }
+        .b-btn { flex: 1; padding: 10px 0; text-align: center; color: #848E9C; font-size: 10px; font-weight: 700; cursor: pointer; }
+        .b-btn.active { color: #3861FB; }
 
-        .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; justify-content: flex-end; flex-direction: column; }
-        .drawer { background: #181D27; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 20px; max-width: 480px; width: 100%; margin: 0 auto; border-top: 1px solid #2B3139; }
-        .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #262D3D; padding-bottom: 12px; margin-bottom: 14px; }
-        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .input-box { background: #12161F; border: 1px solid #2B3139; color: #FFF; padding: 8px 12px; border-radius: 6px; width: 120px; text-align: right; font-size: 15px; font-weight: 700; }
+        /* Modal Drawer */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; justify-content: flex-end; flex-direction: column; }
+        .modal-card { background: #181D27; padding: 20px; border-top-left-radius: 16px; border-top-right-radius: 16px; max-width: 480px; width: 100%; margin: 0 auto; border-top: 1px solid #2B3139; }
     </style>
 </head>
 <body>
 
 <div class="app">
-    <div class="header-top">
-        <div class="search-box">
-            <span style="margin-right:8px; color:#848E9C;">🔍</span>
-            <input type="text" id="globalSearch" placeholder="Search for Nifty, Stocks, F&O..." oninput="handleSearchInput(this.value)">
-        </div>
-        <div style="font-size:20px; cursor:pointer;" onclick="setTab('account')">👤</div>
+    <!-- Top Indices -->
+    <div class="top-bar">
+        <div class="idx-box">NIFTY: <span id="niftyVal" class="up">25,144.30</span></div>
+        <div class="idx-box">SENSEX: <span id="sensexVal" class="up">81,592.45</span></div>
+        <div style="background:#0ECB8122; color:#0ECB81; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700;">LIVE PRO</div>
     </div>
 
-    <div class="cat-scroll">
-        <div class="cat-item active" onclick="setTab('home')">Stocks</div>
-        <div class="cat-item" onclick="setTab('options')">F&O</div>
-        <div class="cat-item" onclick="setTab('portfolio')">Mutual Funds</div>
-        <div class="cat-item" onclick="alert('Loans Section Active')">Loans</div>
-        <div class="cat-item" onclick="alert('Commodity Section Active')">Commodity</div>
+    <!-- Sub Navigation Tabs -->
+    <div class="nav-tabs">
+        <div class="n-tab active" id="tab-watch" onclick="switchTab('watch')">Watchlist</div>
+        <div class="n-tab" id="tab-options" onclick="switchTab('options')">Option Chain</div>
+        <div class="n-tab" id="tab-chart" onclick="switchTab('chart')">TradingView Chart</div>
+        <div class="n-tab" id="tab-algo" onclick="switchTab('algo')">Pro Algo Engine</div>
+        <div class="n-tab" id="tab-pos" onclick="switchTab('pos')">Positions & P&L</div>
     </div>
 
-    <div class="ticker-scroll">
-        <div class="ticker-card" onclick="setTab('options')">
-            <div class="ticker-title"><span>NIFTY 50</span><span style="color:#0ECB81;">Live</span></div>
-            <div id="tkNifty" class="ticker-val up">25,144.30</div>
-            <div style="font-size:10px; color:#F6465D; margin-top:2px;">-155.05 (-0.61%)</div>
-        </div>
-        <div class="ticker-card" onclick="setTab('options')">
-            <div class="ticker-title"><span>SENSEX</span><span style="color:#0ECB81;">Live</span></div>
-            <div id="tkSensex" class="ticker-val up">81,592.45</div>
-            <div style="font-size:10px; color:#F6465D; margin-top:2px;">-318.56 (-0.39%)</div>
-        </div>
-        <div class="ticker-card" onclick="setTab('options')">
-            <div class="ticker-title"><span>BANKNIFTY</span><span style="color:#0ECB81;">Live</span></div>
-            <div id="tkBank" class="ticker-val up">51,420.10</div>
-            <div style="font-size:10px; color:#0ECB81; margin-top:2px;">+112.40 (+0.22%)</div>
-        </div>
-    </div>
+    <!-- Main Dynamic Container -->
+    <div class="main" id="mainContainer"></div>
 
-    <div class="main" id="mainScreen"></div>
-
-    <div class="bottom-nav">
-        <div class="nav-item active" id="nav-home" onclick="setTab('home')"><span class="nav-icon">🏠</span>HOME</div>
-        <div class="nav-item" id="nav-watchlist" onclick="setTab('watchlist')"><span class="nav-icon">⭐</span>WATCHLIST</div>
-        <div class="nav-item" id="nav-portfolio" onclick="setTab('portfolio')"><span class="nav-icon">💼</span>PORTFOLIO</div>
-        <div class="nav-item" id="nav-orders" onclick="setTab('orders')"><span class="nav-icon">📋</span>ORDERS</div>
-        <div class="nav-item" id="nav-account" onclick="setTab('account')"><span class="nav-icon">👤</span>ACCOUNT</div>
+    <!-- Bottom Menu -->
+    <div class="b-nav">
+        <div class="b-btn active" id="b-home" onclick="switchTab('watch')">📋 Watch</div>
+        <div class="b-btn" id="b-opt" onclick="switchTab('options')">⛓️ F&O</div>
+        <div class="b-btn" id="b-alg" onclick="switchTab('algo')">🤖 AI Algo</div>
+        <div class="b-btn" id="b-pnl" onclick="switchTab('pos')">💼 Portfolio</div>
+        <div class="b-btn" id="b-acc" onclick="switchTab('acc')">👤 Account</div>
     </div>
 </div>
 
-<div class="drawer-overlay" id="orderDrawer">
-    <div class="drawer">
-        <div class="drawer-header">
-            <div>
-                <div id="ordSymbol" style="font-size:16px; font-weight:700;">RELIANCE</div>
-                <div id="ordLtp" style="font-size:12px; color:#0ECB81; margin-top:2px;">LTP: ₹ 2,985.50</div>
-            </div>
-            <button class="btn btn-gray" onclick="closeOrderDrawer()">✕</button>
+<!-- Order Modal -->
+<div class="modal-overlay" id="orderModal">
+    <div class="modal-card">
+        <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+            <strong id="mSym" style="font-size:16px;">RELIANCE</strong>
+            <span onclick="closeModal()" style="cursor:pointer; color:#848E9C; font-size:16px;">✕</span>
+        </div>
+        <div style="font-size:13px; color:#0ECB81; margin-bottom:14px;" id="mPrice">LTP: ₹0</div>
+        
+        <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:#848E9C; display:block; margin-bottom:4px;">Quantity (Min ₹1,000 Investment)</label>
+            <input type="number" id="mQty" class="inp" value="1" oninput="calcTotal()">
         </div>
 
-        <div class="input-row">
-            <span style="font-size:13px; color:#848E9C;">Quantity (Min ₹1,000 Invest)</span>
-            <input type="number" id="ordQty" class="input-box" value="1" min="1" oninput="calcOrderCost()">
-        </div>
-
-        <div style="display:flex; justify-content:space-between; background:#12161F; padding:10px; border-radius:6px; font-size:12px; margin-bottom:14px;">
-            <span style="color:#848E9C;">Total Cost: <strong id="ordTotalCost" style="color:#FFF;">₹ 0</strong></span>
-            <span style="color:#848E9C;">Balance: <strong id="ordBal" style="color:#0ECB81;">₹ 50,000</strong></span>
+        <div style="display:flex; justify-content:space-between; background:#12161F; padding:10px; border-radius:6px; font-size:12px; margin-bottom:16px;">
+            <span style="color:#848E9C;">Total Cost: <strong id="mCost" style="color:#FFF;">₹0</strong></span>
+            <span style="color:#848E9C;">Balance: <strong style="color:#0ECB81;">₹<span id="mBal">50,000</span></strong></span>
         </div>
 
         <div style="display:flex; gap:10px;">
-            <button class="btn btn-green" style="flex:1; padding:14px;" onclick="executeTrade('BUY')">BUY</button>
-            <button class="btn btn-red" style="flex:1; padding:14px;" onclick="executeTrade('SELL')">SELL</button>
+            <button class="btn btn-green" style="flex:1; padding:14px;" onclick="placeTrade('BUY')">BUY</button>
+            <button class="btn btn-red" style="flex:1; padding:14px;" onclick="placeTrade('SELL')">SELL</button>
         </div>
     </div>
 </div>
 
 <script>
-    let currentTab = 'home';
+    let currentTab = 'watch';
     let balance = 50000;
-    let niftyPrice = 25144.30;
-    let sensexPrice = 81592.45;
-    let bankNifty = 51420.10;
-    let portfolioPositions = [];
-    let aiAlgos = [];
-    let searchTerm = '';
-    let selectedContract = null;
-
-    let allStocks = [
-        { sym: 'RELIANCE', exch: 'NSE EQ', price: 2985.50, base: 2950 },
-        { sym: 'TCS', exch: 'NSE EQ', price: 3920.00, base: 3900 },
-        { sym: 'HDFCBANK', exch: 'NSE EQ', price: 1542.00, base: 1535 },
-        { sym: 'INFY', exch: 'NSE EQ', price: 1650.50, base: 1640 },
-        { sym: 'TATAMOTORS', exch: 'NSE EQ', price: 984.20, base: 975 },
-        { sym: 'SBIN', exch: 'NSE EQ', price: 765.40, base: 758 },
-        { sym: 'SUZLON', exch: 'BSE/NSE', price: 46.50, base: 45.00 },
-        { sym: 'ZOMATO', exch: 'NSE EQ', price: 185.30, base: 180 },
-        { sym: 'ITC', exch: 'NSE EQ', price: 432.10, base: 430 },
-        { sym: 'ICICIBANK', exch: 'NSE EQ', price: 1090.00, base: 1080 },
-        { sym: 'BHARTIARTL', exch: 'NSE EQ', price: 1240.00, base: 1230 },
-        { sym: 'ADANIENT', exch: 'NSE EQ', price: 3150.00, base: 3100 },
-        { sym: 'TATAPOWER', exch: 'NSE EQ', price: 410.50, base: 405 },
-        { sym: 'IDEA', exch: 'BSE/NSE', price: 14.20, base: 14.00 },
-        { sym: 'POLICYBZR', exch: 'NSE EQ', price: 1105.00, base: 1050 },
-        { sym: 'MCX', exch: 'NSE EQ', price: 3720.00, base: 3620 },
-        { sym: 'GVT&D', exch: 'NSE EQ', price: 4420.00, base: 4200 },
-        { sym: 'KARURVYSYA', exch: 'NSE EQ', price: 381.55, base: 380 },
-        { sym: 'SYLPH', exch: 'BSE/NSE', price: 0.22, base: 0.22 },
-        { sym: 'SMT', exch: 'NSE EQ', price: 533.95, base: 504 },
-        { sym: 'CUPID', exch: 'NSE EQ', price: 377.80, base: 384 },
-        { sym: 'UTLSOLAR', exch: 'NSE EQ', price: 347.05, base: 355 },
-        { sym: 'NMDC', exch: 'NSE EQ', price: 69.80, base: 71 },
-        { sym: 'PCJEWELLER', exch: 'NSE EQ', price: 15.50, base: 15.9 }
+    let nifty = 25144.30;
+    let sensex = 81592.45;
+    let searchTxt = '';
+    let selectedAsset = null;
+    let positions = [];
+    let algos = [
+        { id: 1, name: 'Nifty 9:20 Breakout Algo', status: false, pnl: 0 },
+        { id: 2, name: 'BankNifty RSI Scalper Bot', status: false, pnl: 0 },
+        { id: 3, name: 'SuperTrend Stock Momentum', status: false, pnl: 0 }
     ];
 
+    let masterStocks = [
+        { sym: 'RELIANCE', exch: 'NSE', price: 2985.50, base: 2950 },
+        { sym: 'TCS', exch: 'NSE', price: 3920.00, base: 3900 },
+        { sym: 'HDFCBANK', exch: 'NSE', price: 1542.00, base: 1535 },
+        { sym: 'INFY', exch: 'NSE', price: 1650.50, base: 1640 },
+        { sym: 'TATAMOTORS', exch: 'NSE', price: 984.20, base: 975 },
+        { sym: 'SBIN', exch: 'NSE', price: 765.40, base: 758 },
+        { sym: 'SUZLON', exch: 'BSE/NSE', price: 46.50, base: 45.00 },
+        { sym: 'ZOMATO', exch: 'NSE', price: 185.30, base: 180 },
+        { sym: 'ITC', exch: 'NSE', price: 432.10, base: 430 },
+        { sym: 'ICICIBANK', exch: 'NSE', price: 1090.00, base: 1080 },
+        { sym: 'BHARTIARTL', exch: 'NSE', price: 1240.00, base: 1230 },
+        { sym: 'ADANIENT', exch: 'NSE', price: 3150.00, base: 3100 },
+        { sym: 'TATAPOWER', exch: 'NSE', price: 410.50, base: 405 },
+        { sym: 'IDEA', exch: 'BSE/NSE', price: 14.20, base: 14.00 }
+    ];
+
+    // Live Tick Simulation
     setInterval(() => {
-        niftyPrice = +(niftyPrice + (Math.random() - 0.48) * 12).toFixed(2);
-        sensexPrice = +(sensexPrice + (Math.random() - 0.48) * 35).toFixed(2);
-        bankNifty = +(bankNifty + (Math.random() - 0.48) * 25).toFixed(2);
+        nifty = +(nifty + (Math.random() - 0.48) * 12).toFixed(2);
+        sensex = +(sensex + (Math.random() - 0.48) * 35).toFixed(2);
+        document.getElementById('niftyVal').innerText = nifty.toLocaleString('en-IN');
+        document.getElementById('sensexVal').innerText = sensex.toLocaleString('en-IN');
 
-        document.getElementById('tkNifty').innerText = niftyPrice.toLocaleString('en-IN');
-        document.getElementById('tkSensex').innerText = sensexPrice.toLocaleString('en-IN');
-        document.getElementById('tkBank').innerText = bankNifty.toLocaleString('en-IN');
-
-        allStocks.forEach(s => {
+        masterStocks.forEach(s => {
             s.price = +(s.price * (1 + (Math.random() - 0.49) * 0.004)).toFixed(2);
         });
 
-        portfolioPositions.forEach(p => {
-            let found = allStocks.find(x => x.sym === p.sym);
+        positions.forEach(p => {
+            let found = masterStocks.find(x => x.sym === p.sym);
             if (found) p.ltp = found.price;
         });
 
-        aiAlgos.forEach(a => {
-            if (a.active && Math.random() < 0.12) {
-                let st = allStocks.find(x => x.sym === a.sym);
-                if (st && balance >= 1000) {
-                    let qty = Math.max(1, Math.floor(1000 / st.price));
-                    let cost = st.price * qty;
-                    balance -= cost;
-                    portfolioPositions.push({
-                        sym: st.sym,
+        // Run Active Algos
+        algos.forEach(a => {
+            if (a.status && Math.random() < 0.1) {
+                let randomStock = masterStocks[Math.floor(Math.random() * masterStocks.length)];
+                if (balance >= 1000) {
+                    let qty = Math.max(1, Math.floor(1000 / randomStock.price));
+                    balance -= randomStock.price * qty;
+                    positions.push({
+                        sym: randomStock.sym,
                         side: 'BUY',
                         qty: qty,
-                        avg: st.price,
-                        ltp: st.price,
-                        source: 'AI Algo'
+                        avg: randomStock.price,
+                        ltp: randomStock.price,
+                        tag: a.name
                     });
                 }
             }
         });
 
-        renderScreen();
+        render();
     }, 1500);
 
-    function setTab(tabName) {
-        currentTab = tabName;
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        let activeEl = document.getElementById('nav-' + tabName);
-        if (activeEl) activeEl.classList.add('active');
-        renderScreen();
+    function switchTab(t) {
+        currentTab = t;
+        document.querySelectorAll('.n-tab').forEach(el => el.classList.remove('active'));
+        let target = document.getElementById('tab-' + t);
+        if (target) target.classList.add('active');
+        render();
     }
 
-    function handleSearchInput(val) {
-        searchTerm = val;
-        if (currentTab !== 'watchlist' && currentTab !== 'home') {
-            setTab('watchlist');
-        } else {
-            renderScreen();
-        }
+    function openModal(sym, price) {
+        selectedAsset = { sym, price };
+        document.getElementById('mSym').innerText = sym;
+        document.getElementById('mPrice').innerText = 'LTP: ₹ ' + price.toFixed(2);
+        document.getElementById('mBal').innerText = balance.toLocaleString('en-IN');
+        let minQ = Math.max(1, Math.ceil(1000 / price));
+        document.getElementById('mQty').value = minQ;
+        calcTotal();
+        document.getElementById('orderModal').style.display = 'flex';
     }
 
-    function openOrderDrawer(sym, price) {
-        selectedContract = { sym, price };
-        document.getElementById('ordSymbol').innerText = sym;
-        document.getElementById('ordLtp').innerText = 'LTP: ₹ ' + price.toFixed(2);
-        let minQty = Math.max(1, Math.ceil(1000 / price));
-        document.getElementById('ordQty').value = minQty;
-        document.getElementById('ordBal').innerText = '₹ ' + balance.toLocaleString('en-IN');
-        calcOrderCost();
-        document.getElementById('orderDrawer').style.display = 'flex';
+    function closeModal() {
+        document.getElementById('orderModal').style.display = 'none';
     }
 
-    function closeOrderDrawer() {
-        document.getElementById('orderDrawer').style.display = 'none';
+    function calcTotal() {
+        if (!selectedAsset) return;
+        let q = parseInt(document.getElementById('mQty').value) || 1;
+        let total = +(selectedAsset.price * q).toFixed(2);
+        document.getElementById('mCost').innerText = '₹ ' + total.toLocaleString('en-IN');
     }
 
-    function calcOrderCost() {
-        if (!selectedContract) return;
-        let q = parseInt(document.getElementById('ordQty').value) || 1;
-        let total = +(selectedContract.price * q).toFixed(2);
-        document.getElementById('ordTotalCost').innerText = '₹ ' + total.toLocaleString('en-IN');
-    }
-
-    function executeTrade(side) {
-        let q = parseInt(document.getElementById('ordQty').value) || 1;
-        let cost = +(selectedContract.price * q).toFixed(2);
+    function placeTrade(side) {
+        let q = parseInt(document.getElementById('mQty').value) || 1;
+        let cost = +(selectedAsset.price * q).toFixed(2);
         if (cost < 1000) {
-            alert('Minimum trade amount ₹1,000 zaroori hai!');
+            alert('Minimum trade amount ₹1,000 required!');
             return;
         }
         if (cost > balance) {
@@ -259,121 +215,160 @@
             return;
         }
         balance = +(balance - cost).toFixed(2);
-        portfolioPositions.push({
-            sym: selectedContract.sym,
+        positions.push({
+            sym: selectedAsset.sym,
             side: side,
             qty: q,
-            avg: selectedContract.price,
-            ltp: selectedContract.price,
-            source: 'Manual Trade'
+            avg: selectedAsset.price,
+            ltp: selectedAsset.price,
+            tag: 'Manual'
         });
-        closeOrderDrawer();
-        setTab('portfolio');
+        closeModal();
+        switchTab('pos');
     }
 
-    function closePosition(idx) {
-        let pos = portfolioPositions[idx];
-        let pnl = pos.side === 'BUY' ? (pos.ltp - pos.avg) * pos.qty : (pos.avg - pos.ltp) * pos.qty;
-        let refund = (pos.avg * pos.qty) + pnl;
-        balance = +(balance + refund).toFixed(2);
-        portfolioPositions.splice(idx, 1);
-        renderScreen();
+    function exitPos(idx) {
+        let p = positions[idx];
+        let pnl = p.side === 'BUY' ? (p.ltp - p.avg) * p.qty : (p.avg - p.ltp) * p.qty;
+        balance = +(balance + (p.avg * p.qty) + pnl).toFixed(2);
+        positions.splice(idx, 1);
+        render();
     }
 
-    function toggleStockAlgo(sym) {
-        let existing = aiAlgos.find(x => x.sym === sym);
-        if (existing) {
-            existing.active = !existing.active;
-        } else {
-            aiAlgos.push({ sym: sym, active: true });
-        }
-        alert('AI Algorithm status updated for ' + sym);
-        setTab('watchlist');
+    function toggleAlgo(id) {
+        let al = algos.find(x => x.id === id);
+        if (al) al.status = !al.status;
+        render();
     }
 
-    function renderScreen() {
-        let screen = document.getElementById('mainScreen');
-        let filtered = allStocks.filter(s => s.sym.toLowerCase().includes(searchTerm.toLowerCase()));
+    function render() {
+        let box = document.getElementById('mainContainer');
+        if (!box) return;
 
-        if (currentTab === 'home') {
+        if (currentTab === 'watch') {
+            let filtered = masterStocks.filter(s => s.sym.toLowerCase().includes(searchTxt.toLowerCase()));
             let h = `
-                <div class="banner-card">
-                    <div>
-                        <div style="font-size:14px; font-weight:700;">Get a loan of upto ₹10 lakhs instantly!</div>
-                        <div style="font-size:12px; color:#3861FB; margin-top:4px;">Check Offer ></div>
-                    </div>
-                    <div style="font-size:24px;">🏦</div>
+                <div class="search-box">
+                    <input type="text" class="inp" placeholder="Search BSE / NSE shares (e.g. Reliance, Suzlon)..." value="${searchTxt}" oninput="searchTxt=this.value; render();">
                 </div>
-
-                <div class="section-title"><span>Stocks You're Interested In</span><span style="color:#3861FB; font-size:11px;" onclick="setTab('watchlist')">View All ></span></div>
             `;
-            for (let i = 0; i < 3 && i < filtered.length; i++) {
-                let s = filtered[i];
-                let diff = +(s.price - s.base).toFixed(2);
-                let pct = +((diff / s.base) * 100).toFixed(2);
-                let isUp = diff >= 0;
-                h += `
-                    <div class="stock-row" onclick="openOrderDrawer('${s.sym}', ${s.price})">
-                        <div>
-                            <div class="s-name">${s.sym}</div>
-                            <div class="s-sub">${s.exch}</div>
-                        </div>
-                        <div class="s-price-col">
-                            <div class="s-ltp ${isUp ? 'up' : 'down'}">₹ ${s.price.toLocaleString('en-IN')}</div>
-                            <div class="s-chg ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${diff} (${pct}%)</div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            h += `<div class="section-title"><span>Top Movers & Gainers</span></div>`;
-            for (let i = 3; i < 6 && i < filtered.length; i++) {
-                let s = filtered[i];
-                let diff = +(s.price - s.base).toFixed(2);
-                let pct = +((diff / s.base) * 100).toFixed(2);
-                let isUp = diff >= 0;
-                h += `
-                    <div class="stock-row" onclick="openOrderDrawer('${s.sym}', ${s.price})">
-                        <div>
-                            <div class="s-name">${s.sym}</div>
-                            <div class="s-sub">${s.exch}</div>
-                        </div>
-                        <div class="s-price-col">
-                            <div class="s-ltp ${isUp ? 'up' : 'down'}">₹ ${s.price.toLocaleString('en-IN')}</div>
-                            <div class="s-chg ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${diff} (${pct}%)</div>
-                        </div>
-                    </div>
-                `;
-            }
-            screen.innerHTML = h;
-
-        } else if (currentTab === 'watchlist') {
-            let h = `<div class="section-title"><span>All BSE / NSE Watchlist (${filtered.length} Shares)</span></div>`;
             filtered.forEach(s => {
                 let diff = +(s.price - s.base).toFixed(2);
                 let pct = +((diff / s.base) * 100).toFixed(2);
                 let isUp = diff >= 0;
-                let algoActive = aiAlgos.some(x => x.sym === s.sym && x.active);
                 h += `
-                    <div class="stock-row">
-                        <div onclick="openOrderDrawer('${s.sym}', ${s.price})" style="flex:1; cursor:pointer;">
-                            <div class="s-name">${s.sym}</div>
-                            <div class="s-sub">${s.exch} • Tap to Trade</div>
+                    <div class="stock-item" onclick="openModal('${s.sym}', ${s.price})">
+                        <div>
+                            <div style="font-weight:700; font-size:14px;">${s.sym}</div>
+                            <div style="font-size:11px; color:#848E9C; margin-top:2px;">${s.exch} • Tap to Trade</div>
                         </div>
-                        <div class="s-price-col" onclick="openOrderDrawer('${s.sym}', ${s.price})" style="margin-right:12px; cursor:pointer;">
-                            <div class="s-ltp ${isUp ? 'up' : 'down'}">₹ ${s.price.toLocaleString('en-IN')}</div>
-                            <div class="s-chg ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${diff} (${pct}%)</div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:700; font-size:14px;" class="${isUp ? 'up' : 'down'}">₹ ${s.price.toLocaleString('en-IN')}</div>
+                            <div style="font-size:11px;" class="${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${diff} (${pct}%)</div>
                         </div>
-                        <button class="btn ${algoActive ? 'btn-red' : 'btn-blue'}" style="padding:5px 8px; font-size:10px;" onclick="toggleStockAlgo('${s.sym}')">${algoActive ? 'Stop Algo' : '+ AI Algo'}</button>
                     </div>
                 `;
             });
-            screen.innerHTML = h;
+            box.innerHTML = h;
 
         } else if (currentTab === 'options') {
-            let atm = Math.round(niftyPrice / 50) * 50;
-            let strikes = [atm-100, atm-50, atm, atm+50, atm+100];
+            let atm = Math.round(nifty / 50) * 50;
+            let strikes = [atm-150, atm-100, atm-50, atm, atm+50, atm+100, atm+150];
             let h = `
-                <div style="padding:14px; background:#181D27; font-weight:700; border-bottom:1px solid #262D3D; display:flex; justify-content:space-between;">
-                    <span>NIFTY OPTION CHAIN (F&O)</span>
-    
+                <div style="padding:12px 14px; background:#181D27; font-weight:700; font-size:13px; display:flex; justify-content:space-between; border-bottom:1px solid #262D3D;">
+                    <span>NIFTY OPTION CHAIN</span>
+                    <span style="color:#0ECB81;">Spot: ${nifty}</span>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 0.8fr 1fr; text-align:center; background:#151A24; padding:8px; font-size:11px; color:#848E9C; font-weight:700;">
+                    <div>CALL (CE)</div>
+                    <div>STRIKE</div>
+                    <div>PUT (PE)</div>
+                </div>
+            `;
+            strikes.forEach(st => {
+                let ce = +(120 + Math.random() * 30).toFixed(2);
+                let pe = +(110 + Math.random() * 30).toFixed(2);
+                h += `
+                    <div style="display:grid; grid-template-columns:1fr 0.8fr 1fr; text-align:center; border-bottom:1px solid #1E232F; font-size:13px; align-items:center;">
+                        <div style="padding:12px; color:#0ECB81; cursor:pointer;" onclick="openModal('NIFTY ${st} CE', ${ce})">₹ ${ce}</div>
+                        <div style="background:#181D27; padding:12px; font-weight:700; color:#F0B90B;">${st}</div>
+                        <div style="padding:12px; color:#F6465D; cursor:pointer;" onclick="openModal('NIFTY ${st} PE', ${pe})">₹ ${pe}</div>
+                    </div>
+                `;
+            });
+            box.innerHTML = h;
+
+        } else if (currentTab === 'chart') {
+            box.innerHTML = `
+                <div style="padding:16px;">
+                    <div style="font-size:14px; font-weight:700; margin-bottom:8px;">TradingView Pro Live Chart (NIFTY 50)</div>
+                    <div style="background:#181D27; padding:16px; border-radius:8px; border:1px solid #262D3D; text-align:center;">
+                        <div style="font-size:22px; font-weight:800; color:#0ECB81; margin-bottom:8px;">₹ ${nifty.toLocaleString('en-IN')}</div>
+                        <div style="font-size:12px; color:#848E9C; margin-bottom:16px;">Candlestick & Indicator engine active. Live tick feed connected.</div>
+                        <button class="btn btn-blue" onclick="openModal('NIFTY 50', nifty)">TRADE NIFTY NOW</button>
+                    </div>
+                </div>
+            `;
+
+        } else if (currentTab === 'algo') {
+            let h = `<div style="padding:14px; font-size:14px; font-weight:700;">AUTOMATED PRO AI ALGO BOTS (Min ₹1,000)</div>`;
+            algos.forEach(a => {
+                h += `
+                    <div style="background:#181D27; margin:12px 14px; padding:14px; border-radius:8px; border:1px solid #262D3D; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-size:15px; font-weight:700;">${a.name}</div>
+                            <div style="font-size:11px; color:${a.status ? '#0ECB81' : '#848E9C'}; margin-top:4px;">Status: ${a.status ? 'RUNNING (Auto Trade)' : 'PAUSED'}</div>
+                        </div>
+                        <button class="btn ${a.status ? 'btn-red' : 'btn-green'}" onclick="toggleAlgo(${a.id})">${a.status ? 'STOP' : 'START'}</button>
+                    </div>
+                `;
+            });
+            box.innerHTML = h;
+
+        } else if (currentTab === 'pos') {
+            let tot = 0;
+            positions.forEach(p => {
+                tot += p.side === 'BUY' ? (p.ltp - p.avg) * p.qty : (p.avg - p.ltp) * p.qty;
+            });
+            let h = `
+                <div style="padding:16px; background:#181D27; border-bottom:1px solid #262D3D; text-align:center;">
+                    <div style="font-size:12px; color:#848E9C;">TOTAL PORTFOLIO MTM P&L</div>
+                    <div style="font-size:24px; font-weight:800; margin-top:4px;" class="${tot >= 0 ? 'up' : 'down'}">${tot >= 0 ? '+' : ''}₹ ${tot.toFixed(2)}</div>
+                </div>
+            `;
+            if (positions.length === 0) {
+                h += `<div style="text-align:center; color:#848E9C; margin-top:40px; font-size:13px;">No active positions or trades.</div>`;
+            } else {
+                positions.forEach((p, idx) => {
+                    let pnl = p.side === 'BUY' ? (p.ltp - p.avg) * p.qty : (p.avg - p.ltp) * p.qty;
+                    h += `
+                        <div class="stock-item">
+                            <div>
+                                <div style="font-weight:700;">${p.sym} <span style="font-size:10px; background:#2B3139; padding:2px 6px; border-radius:4px;">${p.side}</span></div>
+                                <div style="font-size:11px; color:#848E9C; margin-top:2px;">Qty: ${p.qty} | Avg: ₹${p.avg} | Source: ${p.tag}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-weight:700;" class="${pnl >= 0 ? 'up' : 'down'}">${pnl >= 0 ? '+' : ''}₹ ${pnl.toFixed(2)}</div>
+                                <button class="btn btn-red" style="padding:4px 8px; font-size:10px; margin-top:4px;" onclick="exitPos(${idx})">EXIT</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            box.innerHTML = h;
+
+        } else if (currentTab === 'acc') {
+            box.innerHTML = `
+                <div style="margin:16px; background:#181D27; padding:18px; border-radius:8px; border:1px solid #262D3D;">
+                    <div style="font-size:12px; color:#848E9C;">AVAILABLE PAPER TRADING CAPITAL</div>
+                    <div style="font-size:26px; font-weight:800; color:#0ECB81; margin:6px 0;">₹ ${balance.toLocaleString('en-IN')}</div>
+                    <button class="btn btn-gray" style="width:100%; margin-top:10px;" onclick="balance=50000; positions=[]; render();">Reset Capital to ₹50,000</button>
+                </div>
+            `;
+        }
+    }
+
+    render();
+</script>
+</body>
+</html>
