@@ -3,415 +3,294 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KHAN AI TRADER - Angel Pro Terminal</title>
+    <title>KHAN AI TRADER</title>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { margin: 0; padding: 0; background-color: #0B0E14; color: #EAECEF; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: sans-serif; }
+        body { margin: 0; padding: 0; background: #0B0E14; color: #EAECEF; }
         .app { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; height: 100vh; background: #12161F; }
         
         /* Login Screen */
-        .login-screen { position: fixed; inset: 0; background: #12161F; z-index: 100; display: flex; flex-direction: column; justify-content: center; padding: 24px; }
-        .login-box { background: #181D27; padding: 20px; border-radius: 12px; border: 1px solid #262D3D; }
-        .login-title { font-size: 20px; font-weight: 800; color: #3861FB; margin-bottom: 6px; text-align: center; }
-        .login-sub { font-size: 12px; color: #848E9C; text-align: center; margin-bottom: 20px; }
-
-        /* Login Toggle Tabs */
-        .login-tabs { display: flex; margin-bottom: 16px; background: #12161F; border-radius: 6px; padding: 3px; }
-        .login-tab { flex: 1; text-align: center; padding: 8px; font-size: 12px; font-weight: 700; color: #848E9C; cursor: pointer; border-radius: 4px; }
-        .login-tab.active { background: #3861FB; color: #FFF; }
-
-        /* Top Ticker Bar */
-        .top-bar { background: #181D27; padding: 10px 14px; border-bottom: 1px solid #262D3D; display: flex; justify-content: space-between; align-items: center; }
-        .index-box { display: flex; gap: 12px; font-size: 12px; }
-        .idx-item div:first-child { color: #848E9C; font-weight: 600; font-size: 10px; }
-        .idx-item div:last-child { font-weight: 700; margin-top: 2px; }
-        .up { color: #0ECB81; }
-        .down { color: #F6465D; }
-        .mode-badge { background: #0ECB8122; color: #0ECB81; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; border: 1px solid #0ECB81; }
-
-        /* Main Content */
-        .main { flex: 1; overflow-y: auto; padding-bottom: 75px; }
-        
-        /* Search Bar */
-        .search-bar { padding: 10px 14px; background: #181D27; border-bottom: 1px solid #262D3D; }
-        .search-input { width: 100%; background: #12161F; border: 1px solid #2B3139; color: #FFF; padding: 10px 14px; border-radius: 6px; font-size: 13px; }
-
-        /* Watchlist Item */
-        .list-item { padding: 12px 14px; border-bottom: 1px solid #1E232F; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .list-item:active { background: #1C2230; }
-        .sym-title { font-size: 14px; font-weight: 700; }
-        .sym-sub { font-size: 11px; color: #848E9C; margin-top: 2px; }
-        .price-col { text-align: right; }
-        .ltp { font-size: 14px; font-weight: 700; }
-        .chg { font-size: 11px; margin-top: 2px; }
-
-        /* Buttons */
-        .btn { border: none; padding: 10px 16px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; color: #FFF; }
+        #loginScreen { position: fixed; inset: 0; background: #12161F; z-index: 9999; display: flex; flex-direction: column; justify-content: center; padding: 20px; }
+        .login-box { background: #181D27; padding: 22px; border-radius: 12px; border: 1px solid #262D3D; }
+        .login-title { font-size: 20px; font-weight: 800; color: #3861FB; text-align: center; margin-bottom: 4px; }
+        .login-sub { font-size: 12px; color: #848E9C; text-align: center; margin-bottom: 18px; }
+        .tabs { display: flex; background: #12161F; padding: 4px; border-radius: 6px; margin-bottom: 16px; }
+        .tab { flex: 1; text-align: center; padding: 8px; font-size: 12px; font-weight: 700; color: #848E9C; border-radius: 4px; cursor: pointer; }
+        .tab.active { background: #3861FB; color: #FFF; }
+        .inp-grp { margin-bottom: 12px; }
+        .inp-grp label { display: block; font-size: 12px; color: #848E9C; margin-bottom: 5px; }
+        .inp { width: 100%; background: #12161F; border: 1px solid #2B3139; color: #FFF; padding: 12px; border-radius: 6px; font-size: 14px; }
+        .btn { border: none; padding: 12px 16px; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; color: #FFF; width: 100%; }
         .btn-blue { background: #3861FB; }
         .btn-green { background: #0ECB81; color: #000; }
         .btn-red { background: #F6465D; }
         .btn-gray { background: #2B3139; color: #EAECEF; }
 
-        /* Drawer */
-        .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; justify-content: flex-end; flex-direction: column; }
-        .drawer { background: #181D27; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 18px; max-width: 480px; width: 100%; margin: 0 auto; border-top: 1px solid #2B3139; }
-        .drawer-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #262D3D; padding-bottom: 12px; margin-bottom: 14px; }
-        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .input-box { background: #12161F; border: 1px solid #2B3139; color: #FFF; padding: 8px 12px; border-radius: 6px; width: 120px; text-align: right; font-size: 15px; font-weight: 700; }
-
-        /* Form */
-        .form-group { margin: 12px 0; }
-        .form-group label { display: block; font-size: 12px; color: #848E9C; margin-bottom: 6px; }
-        .form-input { width: 100%; background: #12161F; border: 1px solid #2B3139; color: #FFF; padding: 12px; border-radius: 6px; font-size: 14px; }
-
-        /* Bottom Nav */
+        /* Main App */
+        .top-bar { background: #181D27; padding: 10px 14px; border-bottom: 1px solid #262D3D; display: flex; justify-content: space-between; align-items: center; }
+        .up { color: #0ECB81; font-weight: 700; }
+        .down { color: #F6465D; font-weight: 700; }
+        .badge { background: #0ECB8122; color: #0ECB81; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; border: 1px solid #0ECB81; }
+        .main { flex: 1; overflow-y: auto; padding-bottom: 70px; }
+        .list-item { padding: 12px 14px; border-bottom: 1px solid #1E232F; display: flex; justify-content: space-between; align-items: center; }
         .nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #181D27; border-top: 1px solid #262D3D; display: flex; }
-        .nav-btn { flex: 1; padding: 10px 0; text-align: center; color: #848E9C; font-size: 11px; font-weight: 600; cursor: pointer; }
+        .nav-btn { flex: 1; padding: 10px 0; text-align: center; color: #848E9C; font-size: 11px; font-weight: 700; cursor: pointer; }
         .nav-btn.active { color: #3861FB; }
-        .nav-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+        
+        /* Order Popup */
+        #orderModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 500; justify-content: flex-end; flex-direction: column; }
+        .modal-box { background: #181D27; padding: 20px; border-top-left-radius: 16px; border-top-right-radius: 16px; max-width: 480px; width: 100%; margin: 0 auto; }
     </style>
 </head>
 <body>
 
-<!-- Login Screen -->
-<div class="login-screen" id="loginScreen">
+<div id="loginScreen">
     <div class="login-box">
         <div class="login-title">KHAN AI TERMINAL</div>
-        <div class="login-sub">Choose your login method</div>
+        <div class="login-sub">Angel One Style Paper & Algo Terminal</div>
         
-        <div class="login-tabs">
-            <div class="login-tab active" id="tabClient" onclick="switchLoginMode('client')">Client ID / MPIN</div>
-            <div class="login-tab" id="tabMobile" onclick="switchLoginMode('mobile')">Mobile Number / OTP</div>
+        <div class="tabs">
+            <div class="tab active" id="tClient" onclick="setMode('client')">Client ID</div>
+            <div class="tab" id="tMobile" onclick="setMode('mobile')">Mobile OTP</div>
         </div>
 
-        <!-- Client Form -->
-        <div id="formClient">
-            <div class="form-group">
-                <label>Client Code</label>
-                <input type="text" id="loginClient" class="form-input" value="K892341" placeholder="Enter Client ID">
+        <div id="boxClient">
+            <div class="inp-grp">
+                <label>Client ID</label>
+                <input type="text" id="cid" class="inp" value="K892341">
             </div>
-            <div class="form-group">
-                <label>MPIN / Password</label>
-                <input type="password" id="loginMpin" class="form-input" value="1234" placeholder="Enter MPIN">
+            <div class="inp-grp">
+                <label>MPIN</label>
+                <input type="password" id="mpin" class="inp" value="1234">
             </div>
         </div>
 
-        <!-- Mobile OTP Form -->
-        <div id="formMobile" style="display:none;">
-            <div class="form-group">
+        <div id="boxMobile" style="display:none;">
+            <div class="inp-grp">
                 <label>Mobile Number</label>
-                <input type="tel" id="loginPhone" class="form-input" placeholder="Enter 10-digit mobile number" maxlength="10">
+                <input type="tel" id="mob" class="inp" placeholder="10-digit number" maxlength="10">
             </div>
-            <div class="form-group" id="otpGroup" style="display:none;">
-                <label>Enter 4-Digit OTP</label>
-                <input type="password" id="loginOtp" class="form-input" value="1234" placeholder="Enter OTP (e.g. 1234)">
+            <div class="inp-grp">
+                <label>OTP (Default: 1234)</label>
+                <input type="text" id="otp" class="inp" value="1234">
             </div>
-            <button class="btn btn-gray" id="otpBtn" style="width:100%; margin-bottom:10px;" onclick="sendOtp()">SEND OTP</button>
         </div>
 
-        <button class="btn btn-blue" style="width:100%; padding:14px; margin-top:6px;" onclick="handleLogin()">LOGIN TO TERMINAL</button>
+        <button type="button" class="btn btn-blue" id="loginBtn" onclick="doLogin()">LOGIN NOW</button>
     </div>
 </div>
 
 <div class="app">
-    <!-- Top Bar -->
     <div class="top-bar">
-        <div class="index-box">
-            <div class="idx-item">
-                <div>NIFTY 50</div>
-                <div id="topNifty" class="up">22,450.00</div>
-            </div>
-            <div class="idx-item">
-                <div>SENSEX</div>
-                <div id="topSensex" class="up">73,850.00</div>
-            </div>
-        </div>
-        <div class="mode-badge">LIVE PAPER</div>
+        <div style="font-size:12px;">NIFTY: <span id="nVal" class="up">22,450.00</span></div>
+        <div style="font-size:12px;">SENSEX: <span id="sVal" class="up">73,850.00</span></div>
+        <div class="badge">LIVE PAPER</div>
     </div>
-
-    <!-- Main Screen -->
-    <div class="main" id="screen"></div>
-
-    <!-- Bottom Nav -->
+    <div class="main" id="content"></div>
     <div class="nav">
-        <div class="nav-btn active" id="nav-watchlist" onclick="setTab('watchlist')"><span class="nav-icon">📋</span>Watchlist</div>
-        <div class="nav-btn" id="nav-algo" onclick="setTab('algo')"><span class="nav-icon">🤖</span>AI Algos</div>
-        <div class="nav-btn" id="nav-positions" onclick="setTab('positions')"><span class="nav-icon">💼</span>Positions</div>
-        <div class="nav-btn" id="nav-account" onclick="setTab('account')"><span class="nav-icon">👤</span>Profile</div>
+        <div class="nav-btn active" id="n-watch" onclick="goTab('watch')">Watchlist</div>
+        <div class="nav-btn" id="n-algo" onclick="goTab('algo')">AI Algos</div>
+        <div class="nav-btn" id="n-pos" onclick="goTab('pos')">Positions</div>
+        <div class="nav-btn" id="n-fund" onclick="goTab('fund')">Funds & API</div>
     </div>
 </div>
 
-<!-- Order Drawer -->
-<div class="drawer-overlay" id="orderDrawer">
-    <div class="drawer">
-        <div class="drawer-head">
-            <div>
-                <div id="ordSymbol" style="font-size:16px; font-weight:700;">RELIANCE</div>
-                <div id="ordLtp" style="font-size:13px; color:#0ECB81; margin-top:2px;">LTP: ₹ 2,985.50</div>
-            </div>
-            <button class="btn btn-gray" style="padding:6px 10px;" onclick="closeOrder()">✕</button>
+<div id="orderModal">
+    <div class="modal-box">
+        <div style="display:flex; justify-content:space-between; margin-bottom:14px;">
+            <strong id="mSym" style="font-size:16px;">STOCK</strong>
+            <span onclick="closeModal()" style="cursor:pointer; padding:4px 8px; background:#2B3139; border-radius:4px;">✕</span>
         </div>
-
-        <div class="input-row">
-            <span style="font-size:13px; color:#848E9C;">Quantity</span>
-            <input type="number" id="ordQty" class="input-box" value="1" min="1" onchange="calcCost()">
+        <div style="font-size:13px; color:#0ECB81; margin-bottom:12px;" id="mPrice">LTP: ₹0</div>
+        <div class="inp-grp">
+            <label>Quantity (Min Investment ₹1,000)</label>
+            <input type="number" id="mQty" class="inp" value="1" oninput="updateEst()">
         </div>
-
-        <div class="input-row">
-            <span style="font-size:13px; color:#848E9C;">Min Investment</span>
-            <span style="font-size:13px; color:#F0B90B;">₹ 1,000+ Allowed</span>
-        </div>
-
-        <div style="display:flex; justify-content:space-between; background:#12161F; padding:10px; border-radius:6px; font-size:12px; margin-bottom:14px;">
-            <span style="color:#848E9C;">Total Cost: <strong id="ordTotal" style="color:#FFF;">₹ 0</strong></span>
-            <span style="color:#848E9C;">Available: <strong id="ordAvail" style="color:#0ECB81;">₹ 50,000</strong></span>
-        </div>
-
+        <div style="font-size:12px; color:#848E9C; margin-bottom:14px;">Required: <strong id="mReq" style="color:#FFF;">₹0</strong> | Avail: <strong id="mAvl" style="color:#0ECB81;">₹50,000</strong></div>
         <div style="display:flex; gap:10px;">
-            <button class="btn btn-green" style="flex:1; padding:14px;" onclick="placeOrder('BUY')">BUY</button>
-            <button class="btn btn-red" style="flex:1; padding:14px;" onclick="placeOrder('SELL')">SELL</button>
+            <button class="btn btn-green" onclick="execOrder('BUY')">BUY</button>
+            <button class="btn btn-red" onclick="execOrder('SELL')">SELL</button>
         </div>
     </div>
 </div>
 
 <script>
-    let activeTab = 'watchlist';
-    let balance = 50000;
-    let niftyPrice = 22450.00;
-    let sensexPrice = 73850.00;
-    let positions = [];
-    let customAlgos = [];
-    let searchQuery = '';
-    let selectedStock = null;
-    let loginMode = 'client';
+    var tab = 'watch';
+    var bal = 50000;
+    var nifty = 22450.00;
+    var sensex = 73850.00;
+    var search = '';
+    var selStock = null;
+    var posList = [];
+    var algoList = [];
 
-    let masterStocks = [
-        { sym: 'RELIANCE', exch: 'NSE EQ', price: 2985.50, base: 2960 },
-        { sym: 'TCS', exch: 'NSE EQ', price: 3920.00, base: 3900 },
-        { sym: 'HDFCBANK', exch: 'NSE EQ', price: 1542.00, base: 1530 },
-        { sym: 'INFY', exch: 'NSE EQ', price: 1650.50, base: 1640 },
-        { sym: 'TATAMOTORS', exch: 'NSE EQ', price: 984.20, base: 990 },
-        { sym: 'SBIN', exch: 'NSE EQ', price: 765.40, base: 758 },
-        { sym: 'SUZLON', exch: 'BSE/NSE', price: 46.50, base: 45.00 },
-        { sym: 'ZOMATO', exch: 'NSE EQ', price: 185.30, base: 180 },
-        { sym: 'ITC', exch: 'NSE EQ', price: 432.10, base: 430 },
-        { sym: 'ICICIBANK', exch: 'NSE EQ', price: 1090.00, base: 1080 },
-        { sym: 'BHARTIARTL', exch: 'NSE EQ', price: 1240.00, base: 1230 },
-        { sym: 'ADANIENT', exch: 'NSE EQ', price: 3150.00, base: 3100 },
-        { sym: 'TATAPOWER', exch: 'NSE EQ', price: 410.50, base: 405 },
-        { sym: 'IDEA', exch: 'BSE/NSE', price: 14.20, base: 14.00 }
+    var stocks = [
+        { s: 'RELIANCE', e: 'NSE', p: 2985.50 },
+        { s: 'TCS', e: 'NSE', p: 3920.00 },
+        { s: 'HDFCBANK', e: 'NSE', p: 1542.00 },
+        { s: 'TATAMOTORS', e: 'NSE', p: 984.20 },
+        { s: 'SBIN', e: 'NSE', p: 765.40 },
+        { s: 'SUZLON', e: 'BSE/NSE', p: 46.50 },
+        { s: 'ZOMATO', e: 'NSE', p: 185.30 },
+        { s: 'ITC', e: 'NSE', p: 432.10 },
+        { s: 'INFY', e: 'NSE', p: 1650.50 },
+        { s: 'IDEA', e: 'BSE/NSE', p: 14.20 }
     ];
 
-    function switchLoginMode(mode) {
-        loginMode = mode;
-        document.getElementById('tabClient').classList.toggle('active', mode === 'client');
-        document.getElementById('tabMobile').classList.toggle('active', mode === 'mobile');
-        document.getElementById('formClient').style.display = mode === 'client' ? 'block' : 'none';
-        document.getElementById('formMobile').style.display = mode === 'mobile' ? 'block' : 'none';
+    function setMode(m) {
+        document.getElementById('tClient').className = m === 'client' ? 'tab active' : 'tab';
+        document.getElementById('tMobile').className = m === 'mobile' ? 'tab active' : 'tab';
+        document.getElementById('boxClient').style.display = m === 'client' ? 'block' : 'none';
+        document.getElementById('boxMobile').style.display = m === 'mobile' ? 'block' : 'none';
     }
 
-    function sendOtp() {
-        const phone = document.getElementById('loginPhone').value;
-        if (phone.length < 10) {
-            alert('Kripya sahi 10-digit mobile number daalein.');
-            return;
+    function doLogin() {
+        var screen = document.getElementById('loginScreen');
+        if (screen) {
+            screen.style.display = 'none';
         }
-        document.getElementById('otpGroup').style.display = 'block';
-        document.getElementById('otpBtn').innerText = 'OTP SENT (DEMO: 1234)';
-        alert('Demo OTP sent to ' + phone + ' (Use 1234 to login)');
+        draw();
     }
 
-    function handleLogin() {
-        if (loginMode === 'client') {
-            const client = document.getElementById('loginClient').value;
-            if (!client) {
-                alert('Kripya Client ID daalein.');
-                return;
-            }
-        } else {
-            const phone = document.getElementById('loginPhone').value;
-            const otp = document.getElementById('loginOtp').value;
-            if (!phone || otp !== '1234') {
-                alert('Kripya sahi mobile number aur valid OTP (1234) daalein.');
-                return;
-            }
+    setInterval(function() {
+        nifty = +(nifty + (Math.random() - 0.48) * 10).toFixed(2);
+        sensex = +(sensex + (Math.random() - 0.48) * 30).toFixed(2);
+        document.getElementById('nVal').innerText = nifty.toLocaleString('en-IN');
+        document.getElementById('sVal').innerText = sensex.toLocaleString('en-IN');
+
+        for (var i = 0; i < stocks.length; i++) {
+            stocks[i].p = +(stocks[i].p * (1 + (Math.random() - 0.49) * 0.004)).toFixed(2);
         }
-        document.getElementById('loginScreen').style.display = 'none';
-        render();
-    }
 
-    // Live Tick Loop
-    setInterval(() => {
-        niftyPrice = +(niftyPrice + (Math.random() - 0.48) * 12).toFixed(2);
-        sensexPrice = +(sensexPrice + (Math.random() - 0.48) * 35).toFixed(2);
+        for (var j = 0; j < posList.length; j++) {
+            var st = stocks.find(function(x) { return x.s === posList[j].s; });
+            if (st) posList[j].ltp = st.p;
+        }
 
-        document.getElementById('topNifty').innerText = niftyPrice.toLocaleString('en-IN');
-        document.getElementById('topSensex').innerText = sensexPrice.toLocaleString('en-IN');
-
-        masterStocks.forEach(s => {
-            s.price = +(s.price * (1 + (Math.random() - 0.49) * 0.004)).toFixed(2);
-        });
-
-        positions.forEach(p => {
-            const liveObj = masterStocks.find(x => x.sym === p.sym);
-            if (liveObj) p.ltp = liveObj.price;
-        });
-
-        customAlgos.forEach(a => {
-            if (a.active && Math.random() < 0.12) {
-                const st = masterStocks.find(x => x.sym === a.sym);
-                if (st && balance >= 1000) {
-                    const qty = Math.max(1, Math.floor(1000 / st.price));
-                    const cost = st.price * qty;
-                    balance -= cost;
-                    positions.push({
-                        sym: st.sym,
-                        side: 'BUY',
-                        qty: qty,
-                        avg: st.price,
-                        ltp: st.price,
-                        source: 'AI Algo (' + a.sym + ')'
-                    });
+        for (var k = 0; k < algoList.length; k++) {
+            if (algoList[k].on && Math.random() < 0.15) {
+                var targetSt = stocks.find(function(x) { return x.s === algoList[k].s; });
+                if (targetSt && bal >= 1000) {
+                    var q = Math.max(1, Math.floor(1000 / targetSt.p));
+                    var c = +(targetSt.p * q).toFixed(2);
+                    bal = +(bal - c).toFixed(2);
+                    posList.push({ s: targetSt.s, side: 'BUY', q: q, avg: targetSt.p, ltp: targetSt.p, bot: true });
                 }
             }
-        });
-
-        render();
+        }
+        draw();
     }, 1500);
 
-    function setTab(tab) {
-        activeTab = tab;
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('nav-' + tab).classList.add('active');
-        render();
+    function goTab(t) {
+        tab = t;
+        var btns = document.querySelectorAll('.nav-btn');
+        for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+        document.getElementById('n-' + t).classList.add('active');
+        draw();
     }
 
-    function openOrder(sym, price) {
-        selectedStock = { sym, price };
-        document.getElementById('ordSymbol').innerText = sym;
-        document.getElementById('ordLtp').innerText = 'LTP: ₹ ' + price.toFixed(2);
-        let defQty = Math.max(1, Math.floor(1000 / price));
-        document.getElementById('ordQty').value = defQty;
-        document.getElementById('ordAvail').innerText = '₹ ' + balance.toLocaleString('en-IN');
-        calcCost();
-        document.getElementById('orderDrawer').style.display = 'flex';
+    function openBuy(sym, price) {
+        selStock = { s: sym, p: price };
+        document.getElementById('mSym').innerText = sym;
+        document.getElementById('mPrice').innerText = 'LTP: ₹' + price;
+        var minQ = Math.max(1, Math.ceil(1000 / price));
+        document.getElementById('mQty').value = minQ;
+        document.getElementById('mAvl').innerText = '₹' + bal.toLocaleString('en-IN');
+        updateEst();
+        document.getElementById('orderModal').style.display = 'flex';
     }
 
-    function closeOrder() {
-        document.getElementById('orderDrawer').style.display = 'none';
+    function closeModal() {
+        document.getElementById('orderModal').style.display = 'none';
     }
 
-    function calcCost() {
-        if (!selectedStock) return;
-        const qty = parseInt(document.getElementById('ordQty').value) || 1;
-        const total = +(selectedStock.price * qty).toFixed(2);
-        document.getElementById('ordTotal').innerText = '₹ ' + total.toLocaleString('en-IN');
+    function updateEst() {
+        if (!selStock) return;
+        var q = parseInt(document.getElementById('mQty').value) || 1;
+        document.getElementById('mReq').innerText = '₹' + (selStock.p * q).toFixed(2);
     }
 
-    function placeOrder(side) {
-        const qty = parseInt(document.getElementById('ordQty').value) || 1;
-        const cost = +(selectedStock.price * qty).toFixed(2);
+    function execOrder(side) {
+        var q = parseInt(document.getElementById('mQty').value) || 1;
+        var cost = +(selStock.p * q).toFixed(2);
+        if (cost < 1000) { alert('Minimum ₹1,000 ka trade zaroori hai!'); return; }
+        if (cost > bal) { alert('Balance kam hai!'); return; }
+        bal = +(bal - cost).toFixed(2);
+        posList.push({ s: selStock.s, side: side, q: q, avg: selStock.p, ltp: selStock.p, bot: false });
+        closeModal();
+        goTab('pos');
+    }
 
-        if (cost < 1000) {
-            alert('Minimum trade amount ₹1,000 se kam nahi ho sakta!');
-            return;
+    function closePos(idx) {
+        var p = posList[idx];
+        var pnl = p.side === 'BUY' ? (p.ltp - p.avg) * p.q : (p.avg - p.ltp) * p.q;
+        bal = +(bal + (p.avg * p.q) + pnl).toFixed(2);
+        posList.splice(idx, 1);
+        draw();
+    }
+
+    function startStockAlgo(sym) {
+        for (var i = 0; i < algoList.length; i++) {
+            if (algoList[i].s === sym) { alert('Already added!'); return; }
         }
-        if (cost > balance) {
-            alert('Insufficient Funds! Available Balance: ₹' + balance);
-            return;
-        }
-
-        balance = +(balance - cost).toFixed(2);
-        positions.push({
-            sym: selectedStock.sym,
-            side: side,
-            qty: qty,
-            avg: selectedStock.price,
-            ltp: selectedStock.price,
-            source: 'Manual'
-        });
-
-        closeOrder();
-        setTab('positions');
+        algoList.push({ s: sym, on: true });
+        alert(sym + ' par ₹1,000+ AI Algo chalu ho gaya!');
+        goTab('algo');
     }
 
-    function exitPosition(index) {
-        const p = positions[index];
-        const pnl = p.side === 'BUY' ? (p.ltp - p.avg) * p.qty : (p.avg - p.ltp) * p.qty;
-        const release = (p.avg * p.qty) + pnl;
-        balance = +(balance + release).toFixed(2);
-        positions.splice(index, 1);
-        render();
+    function toggleAlgo(idx) {
+        algoList[idx].on = !algoList[idx].on;
+        draw();
     }
 
-    function addSingleStockAlgo(sym) {
-        if (customAlgos.some(a => a.sym === sym)) {
-            alert('Is share par algo pehle se added hai!');
-            return;
-        }
-        customAlgos.push({ sym: sym, active: true });
-        alert(`AI Algorithm successfully activated for: ${sym}`);
-        setTab('algo');
-    }
-
-    function toggleCustomAlgo(sym) {
-        const a = customAlgos.find(x => x.sym === sym);
-        if (a) a.active = !a.active;
-        render();
-    }
-
-    function render() {
-        const screen = document.getElementById('screen');
-
-        if (activeTab === 'watchlist') {
-            const filtered = masterStocks.filter(s => s.sym.toLowerCase().includes(searchQuery.toLowerCase()));
-            let html = `
-                <div class="search-bar">
-                    <input type="text" class="search-input" placeholder="Search BSE / NSE shares..." value="${searchQuery}" oninput="searchQuery=this.value; render();">
-                </div>
-            `;
-            filtered.forEach(w => {
-                const diff = +(w.price - w.base).toFixed(2);
-                const pct = +((diff / w.base) * 100).toFixed(2);
-                const isUp = diff >= 0;
-                html += `
-                    <div class="list-item">
-                        <div onclick="openOrder('${w.sym}', ${w.price})" style="flex:1;">
-                            <div class="sym-title">${w.sym}</div>
-                            <div class="sym-sub">${w.exch} • Tap to Trade</div>
-                        </div>
-                        <div class="price-col" onclick="openOrder('${w.sym}', ${w.price})" style="margin-right:12px;">
-                            <div class="ltp ${isUp ? 'up' : 'down'}">₹ ${w.price.toLocaleString('en-IN')}</div>
-                            <div class="chg ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${diff} (${pct}%)</div>
-                        </div>
-                        <button class="btn btn-blue" style="padding:6px 10px; font-size:11px;" onclick="addSingleStockAlgo('${w.sym}')">+ AI Algo</button>
-                    </div>
-                `;
-            });
-            screen.innerHTML = html;
-
-        } else if (activeTab === 'algo') {
-            let html = `<div style="padding:14px; font-size:14px; font-weight:700;">SINGLE SHARE AI ALGORITHMS (Min ₹1,000)</div>`;
-            if (customAlgos.length === 0) {
-                html += `<div style="text-align:center; color:#848E9C; margin-top:40px; font-size:13px; padding:0 20px;">Koi single share algo active nahi hai.<br><b>Watchlist</b> mein jakar kisi bhi share ke samne <b>+ AI Algo</b> dabayein!</div>`;
-            } else {
-                customAlgos.forEach(a => {
-                    html += `
-                        <div style="background:#181D27; margin:12px; padding:14px; border-radius:8px; border:1px solid #262D3D; display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <div style="font-size:16px; font-weight:700;">${a.sym} AI Bot</div>
-                                <div style="font-size:12px; color:#0ECB81; margin-top:4px;">Status: ${a.active ? 'RUNNING' : 'PAUSED'}</div>
-                            </div>
-                            <button class="btn ${a.active ? 'btn-red' : 'btn-green'}" onclick="toggleCustomAlgo('${a.sym}')">
-                                ${a.active ? 'STOP' : 'START'}
-                            </button>
-                        </div>
-                    `;
-                });
+    function draw() {
+        var box = document.getElementById('content');
+        if (tab === 'watch') {
+            var h = '<div style="padding:10px;"><input type="text" class="inp" placeholder="Search BSE/NSE stock..." value="' + search + '" oninput="search=this.value; draw();"></div>';
+            for (var i = 0; i < stocks.length; i++) {
+                var st = stocks[i];
+                if (st.s.toLowerCase().indexOf(search.toLowerCase()) === -1) continue;
+                h += '<div class="list-item">' +
+                    '<div onclick="openBuy(\'' + st.s + '\',' + st.p + ')" style="flex:1; cursor:pointer;"><strong>' + st.s + '</strong><div style="font-size:11px; color:#848E9C;">' + st.e + ' • Tap to Trade</div></div>' +
+                    '<div onclick="openBuy(\'' + st.s + '\',' + st.p + ')" style="margin-right:12px; font-weight:700; color:#0ECB81; cursor:pointer;">₹' + st.p + '</div>' +
+                    '<button class="btn btn-blue" style="width:auto; padding:6px 10px; font-size:11px;" onclick="startStockAlgo(\'' + st.s + '\')">+ AI Algo</button>' +
+                    '</div>';
             }
-            screen.innerHTML = html;
-
-        } else if (activeTab === 'positions') {
-            let totalPnL = 0;
-            positions.forEach(p => {
-                totalPnL += p.side === 'BUY' ? (p.ltp - p.avg) 
+            box.innerHTML = h;
+        } else if (tab === 'algo') {
+            var h = '<div style="padding:14px; font-weight:700;">ACTIVE AI ALGOS (Min ₹1,000)</div>';
+            if (algoList.length === 0) h += '<div style="padding:30px; text-align:center; color:#848E9C;">Watchlist me kisi bhi share par "+ AI Algo" dabayein.</div>';
+            for (var i = 0; i < algoList.length; i++) {
+                var a = algoList[i];
+                h += '<div class="list-item"><div><strong>' + a.s + ' AI Bot</strong><div style="font-size:11px; color:#0ECB81;">' + (a.on ? 'RUNNING' : 'PAUSED') + '</div></div>' +
+                    '<button class="btn ' + (a.on ? 'btn-red' : 'btn-green') + '" style="width:auto; padding:6px 14px;" onclick="toggleAlgo(' + i + ')">' + (a.on ? 'STOP' : 'START') + '</button></div>';
+            }
+            box.innerHTML = h;
+        } else if (tab === 'pos') {
+            var tot = 0;
+            for (var i = 0; i < posList.length; i++) {
+                var p = posList[i];
+                tot += p.side === 'BUY' ? (p.ltp - p.avg) * p.q : (p.avg - p.ltp) * p.q;
+            }
+            var h = '<div style="padding:16px; text-align:center; background:#181D27;">Total P&L: <strong class="' + (tot >= 0 ? 'up' : 'down') + '" style="font-size:20px;">₹' + tot.toFixed(2) + '</strong></div>';
+            for (var i = 0; i < posList.length; i++) {
+                var p = posList[i];
+                var pnl = p.side === 'BUY' ? (p.ltp - p.avg) * p.q : (p.avg - p.ltp) * p.q;
+                h += '<div class="list-item"><div><strong>' + p.s + '</strong> (' + p.q + ' Qty)<div style="font-size:11px; color:#848E9C;">Avg: ₹' + p.avg + (p.bot ? ' • AI Bot' : '') + '</div></div>' +
+                    '<div style="text-align:right;"><div class="' + (pnl >= 0 ? 'up' : 'down') + '">₹' + pnl.toFixed(2) + '</div>' +
+                    '<button class="btn btn-red" style="width:auto; padding:4px 10px; font-size:11px; margin-top:4px;" onclick="closePos(' + i + ')">EXIT</button></div></div>';
+            }
+            box.innerHTML = h;
+        } else if (tab === 'fund') {
+            box.innerHTML = '<div style="padding:20px;"><div style="background:#181D27; padding:16px; border-radius:8px; margin-bottom:16px;">' +
+                '<div style="font-size:12px; color:#848E9C;">Available Funds</div><div style="font-size:24px; font-weight:800; color:#0ECB81; margin:8px 0;">₹' + bal.toLocaleString('en-IN') + '</div>' +
+                '<button class="btn btn-gray" onclick="bal=50000; posList=[]; draw();">Reset ₹50,000</button></div>' +
+                '<div style="background:#181D27; padding:16px; border-radius:8px;"><strong>Angel One SmartAPI Bridge</strong><p style="font-size:12px; color:#848E9C;">API Key milne par yahan connect karein:</p>' +
+                '<input type="text" class="inp" placeholder="SmartAPI Key" style="margin-bottom:10px;">' +
+                '<button class="btn btn-blue" onclick="alert(\'API Bridge Saved!\')">SAVE API KEY</button></div></div>';
+        }
+    }
+    draw();
+</script>
+</body>
+</html>
