@@ -14,9 +14,6 @@
         .login-box { background: #181D27; padding: 22px; border-radius: 12px; border: 1px solid #262D3D; }
         .login-title { font-size: 20px; font-weight: 800; color: #3861FB; text-align: center; margin-bottom: 4px; }
         .login-sub { font-size: 12px; color: #848E9C; text-align: center; margin-bottom: 18px; }
-        .tabs { display: flex; background: #12161F; padding: 4px; border-radius: 6px; margin-bottom: 16px; }
-        .tab { flex: 1; text-align: center; padding: 8px; font-size: 12px; font-weight: 700; color: #848E9C; border-radius: 4px; cursor: pointer; }
-        .tab.active { background: #3861FB; color: #FFF; }
         .inp-grp { margin-bottom: 12px; }
         .inp-grp label { display: block; font-size: 12px; color: #848E9C; margin-bottom: 5px; }
         .inp { width: 100%; background: #12161F; border: 1px solid #2B3139; color: #FFF; padding: 12px; border-radius: 6px; font-size: 14px; }
@@ -47,36 +44,20 @@
 <div id="loginScreen">
     <div class="login-box">
         <div class="login-title">KHAN AI TERMINAL</div>
-        <div class="login-sub">Angel One Style Paper & Algo Terminal</div>
+        <div class="login-sub">Mobile Number & OTP Login</div>
         
-        <div class="tabs">
-            <div class="tab active" id="tClient" onclick="setMode('client')">Client ID</div>
-            <div class="tab" id="tMobile" onclick="setMode('mobile')">Mobile OTP</div>
+        <div class="inp-grp">
+            <label>Mobile Number</label>
+            <input type="tel" id="mob" class="inp" placeholder="Enter 10-digit mobile number" maxlength="10">
+        </div>
+        
+        <div class="inp-grp" id="otpBox" style="display:none;">
+            <label>Enter 4-Digit OTP (Demo: 1234)</label>
+            <input type="text" id="otp" class="inp" value="1234">
         </div>
 
-        <div id="boxClient">
-            <div class="inp-grp">
-                <label>Client ID</label>
-                <input type="text" id="cid" class="inp" value="K892341">
-            </div>
-            <div class="inp-grp">
-                <label>MPIN</label>
-                <input type="password" id="mpin" class="inp" value="1234">
-            </div>
-        </div>
-
-        <div id="boxMobile" style="display:none;">
-            <div class="inp-grp">
-                <label>Mobile Number</label>
-                <input type="tel" id="mob" class="inp" placeholder="10-digit number" maxlength="10">
-            </div>
-            <div class="inp-grp">
-                <label>OTP (Default: 1234)</label>
-                <input type="text" id="otp" class="inp" value="1234">
-            </div>
-        </div>
-
-        <button type="button" class="btn btn-blue" id="loginBtn" onclick="doLogin()">LOGIN NOW</button>
+        <button type="button" class="btn btn-gray" id="otpBtn" style="margin-bottom:12px;" onclick="sendOtpCode()">SEND OTP</button>
+        <button type="button" class="btn btn-blue" onclick="verifyAndLogin()">VERIFY & LOGIN</button>
     </div>
 </div>
 
@@ -137,18 +118,29 @@
         { s: 'IDEA', e: 'BSE/NSE', p: 14.20 }
     ];
 
-    function setMode(m) {
-        document.getElementById('tClient').className = m === 'client' ? 'tab active' : 'tab';
-        document.getElementById('tMobile').className = m === 'mobile' ? 'tab active' : 'tab';
-        document.getElementById('boxClient').style.display = m === 'client' ? 'block' : 'none';
-        document.getElementById('boxMobile').style.display = m === 'mobile' ? 'block' : 'none';
+    function sendOtpCode() {
+        var m = document.getElementById('mob').value;
+        if (m.length < 10) {
+            alert('Kripya sahi 10-digit mobile number daalein!');
+            return;
+        }
+        document.getElementById('otpBox').style.display = 'block';
+        document.getElementById('otpBtn').innerText = 'OTP SENT (1234)';
+        alert('OTP bhej diya gaya hai: 1234');
     }
 
-    function doLogin() {
-        var screen = document.getElementById('loginScreen');
-        if (screen) {
-            screen.style.display = 'none';
+    function verifyAndLogin() {
+        var m = document.getElementById('mob').value;
+        var o = document.getElementById('otp').value;
+        if (m.length < 10) {
+            alert('Pehle mobile number daalein!');
+            return;
         }
+        if (o !== '1234') {
+            alert('Galat OTP! Kripya 1234 daalein.');
+            return;
+        }
+        document.getElementById('loginScreen').style.display = 'none';
         draw();
     }
 
@@ -245,6 +237,7 @@
 
     function draw() {
         var box = document.getElementById('content');
+        if (!box) return;
         if (tab === 'watch') {
             var h = '<div style="padding:10px;"><input type="text" class="inp" placeholder="Search BSE/NSE stock..." value="' + search + '" oninput="search=this.value; draw();"></div>';
             for (var i = 0; i < stocks.length; i++) {
@@ -290,7 +283,6 @@
                 '<button class="btn btn-blue" onclick="alert(\'API Bridge Saved!\')">SAVE API KEY</button></div></div>';
         }
     }
-    draw();
 </script>
 </body>
 </html>
