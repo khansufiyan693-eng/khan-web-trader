@@ -1,1083 +1,446 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KHAN AI TRADER</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KHAN AI TRADER - Pro Terminal</title>
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { margin: 0; padding: 0; background-color: #0B0E14; color: #EAECEF; }
+        .app { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; height: 100vh; background: #12161F; position: relative; }
+        
+        /* Top Ticker Bar */
+        .top-bar { background: #181D27; padding: 10px 12px; border-bottom: 1px solid #262D3D; display: flex; overflow-x: auto; gap: 10px; white-space: nowrap; scrollbar-width: none; }
+        .top-bar::-webkit-scrollbar { display: none; }
+        .idx-pill { background: #12161F; padding: 6px 12px; border-radius: 6px; border: 1px solid #262D3D; font-size: 11px; cursor: pointer; flex-shrink: 0; }
+        .idx-pill.active { border-color: #3861FB; background: #3861FB18; }
+        .up { color: #0ECB81; font-weight: 700; }
+        .down { color: #F6465D; font-weight: 700; }
 
-<style>
-* {
-    box-sizing: border-box;
-}
+        /* Navigation Tabs */
+        .nav-tabs { display: flex; background: #181D27; border-bottom: 1px solid #262D3D; }
+        .n-tab { flex: 1; text-align: center; padding: 10px 4px; font-size: 11px; font-weight: 700; color: #848E9C; cursor: pointer; }
+        .n-tab.active { color: #3861FB; border-bottom: 2px solid #3861FB; background: #151A24; }
 
-body {
-    margin: 0;
-    background: #080e19;
-    color: #e8eef8;
-    font-family: Arial, sans-serif;
-}
+        /* Main Content Area */
+        .main { flex: 1; overflow-y: auto; padding-bottom: 75px; background: #12161F; }
+        .search-box { padding: 10px 12px; background: #181D27; border-bottom: 1px solid #262D3D; }
+        .inp { width: 100%; background: #12161F; border: 1px solid #2B3139; color: #FFF; padding: 10px; border-radius: 6px; font-size: 13px; outline: none; }
+        .stock-row { padding: 12px 14px; border-bottom: 1px solid #1E232F; display: flex; justify-content: space-between; align-items: center; background: #12161F; }
+        
+        .btn { border: none; padding: 8px 12px; border-radius: 5px; font-weight: 700; font-size: 11px; cursor: pointer; color: #FFF; }
+        .btn-blue { background: #3861FB; }
+        .btn-green { background: #0ECB81; color: #000; }
+        .btn-red { background: #F6465D; }
+        .btn-gray { background: #2B3139; color: #EAECEF; }
 
-header {
-    background: #101b2c;
-    padding: 18px;
-    border-bottom: 1px solid #26364d;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-}
+        /* Bottom Menu */
+        .b-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #181D27; border-top: 1px solid #262D3D; display: flex; z-index: 50; }
+        .b-btn { flex: 1; padding: 10px 0; text-align: center; color: #848E9C; font-size: 10px; font-weight: 700; cursor: pointer; }
+        .b-btn.active { color: #3861FB; }
 
-header h1 {
-    margin: 0;
-    color: #21d6a1;
-    font-size: 22px;
-}
-
-.container {
-    padding: 15px;
-    max-width: 1200px;
-    margin: auto;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 12px;
-}
-
-.card {
-    background: #111c2d;
-    border: 1px solid #26364d;
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 14px;
-}
-
-.card h3 {
-    margin-top: 0;
-    color: #9fb4d0;
-    font-size: 14px;
-}
-
-.value {
-    font-size: 25px;
-    font-weight: bold;
-    margin-top: 8px;
-}
-
-.green {
-    color: #20d69e;
-}
-
-.red {
-    color: #ff596b;
-}
-
-.yellow {
-    color: #ffc857;
-}
-
-label {
-    display: block;
-    margin: 12px 0 5px;
-    color: #b7c5d9;
-    font-size: 13px;
-}
-
-input, select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #344761;
-    background: #091321;
-    color: white;
-    border-radius: 7px;
-    outline: none;
-}
-
-button {
-    border: 0;
-    padding: 12px 15px;
-    border-radius: 7px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 12px;
-}
-
-.primary {
-    background: #16c995;
-    color: #061b15;
-}
-
-.danger {
-    background: #e64d60;
-    color: white;
-}
-
-.secondary {
-    background: #273a54;
-    color: white;
-}
-
-button:disabled {
-    opacity: .4;
-    cursor: not-allowed;
-}
-
-.status {
-    padding: 10px;
-    border-radius: 7px;
-    background: #17273b;
-    margin: 10px 0;
-    font-size: 13px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 650px;
-}
-
-th, td {
-    padding: 12px 9px;
-    border-bottom: 1px solid #28374b;
-    text-align: left;
-    font-size: 13px;
-}
-
-th {
-    color: #91a8c5;
-}
-
-.table-wrap {
-    overflow-x: auto;
-}
-
-.small {
-    color: #91a8c5;
-    font-size: 12px;
-    line-height: 1.6;
-}
-
-.section-title {
-    color: #20d6a1;
-    margin: 22px 0 12px;
-}
-
-.actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-#notifications {
-    max-height: 180px;
-    overflow-y: auto;
-}
-
-.notice {
-    background: #17273b;
-    padding: 9px;
-    margin: 6px 0;
-    border-radius: 6px;
-    font-size: 12px;
-}
-
-footer {
-    text-align: center;
-    color: #75869e;
-    padding: 25px;
-    font-size: 12px;
-}
-</style>
+        /* Modal Overlay */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: flex-end; flex-direction: column; }
+        .modal-card { background: #181D27; padding: 20px; border-top-left-radius: 16px; border-top-right-radius: 16px; max-width: 480px; width: 100%; margin: 0 auto; border-top: 1px solid #2B3139; }
+        .row-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13px; }
+    </style>
 </head>
+<body onload="initApp()">
 
-<body>
+<div class="app">
+    <!-- Top Ticker Bar -->
+    <div class="top-bar" id="topTickerBar"></div>
 
-<header>
-    <h1>KHAN AI TRADER</h1>
-    <div id="connectionStatus" class="yellow">
-        PAPER TRADING MODE
-    </div>
-</header>
-
-<div class="container">
-
-    <div class="status">
-        یہ پیپر ٹریڈنگ سسٹم ہے۔ حقیقی مارکیٹ ڈیٹا یا Angel One آرڈرز منسلک نہیں ہیں۔
-        قیمتیں آپ خود درج کریں گے۔
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <div class="n-tab active" id="t-watch" onclick="changeTab('watch')">Watchlist</div>
+        <div class="n-tab" id="t-options" onclick="changeTab('options')">Option Chain</div>
+        <div class="n-tab" id="t-algos" onclick="changeTab('algos')">AI Bots</div>
+        <div class="n-tab" id="t-pos" onclick="changeTab('pos')">Positions</div>
     </div>
 
-    <h3 class="section-title">TRADING DASHBOARD</h3>
+    <!-- Dynamic Main Area -->
+    <div class="main" id="mainArea"></div>
 
-    <div class="grid">
-
-        <div class="card">
-            <h3>INITIAL CAPITAL</h3>
-            <div class="value">₹5,000</div>
-        </div>
-
-        <div class="card">
-            <h3>AVAILABLE BALANCE</h3>
-            <div class="value green" id="balance">₹5,000</div>
-        </div>
-
-        <div class="card">
-            <h3>OPEN P&L</h3>
-            <div class="value" id="openPnl">₹0</div>
-        </div>
-
-        <div class="card">
-            <h3>TODAY REALIZED P&L</h3>
-            <div class="value" id="dailyPnl">₹0</div>
-        </div>
-
-        <div class="card">
-            <h3>MAXIMUM RISK PER TRADE</h3>
-            <div class="value yellow">₹100</div>
-        </div>
-
-        <div class="card">
-            <h3>DAILY LOSS LIMIT</h3>
-            <div class="value red">₹200</div>
-        </div>
-
+    <!-- Bottom Navigation Bar -->
+    <div class="b-nav">
+        <div class="b-btn active" id="b-watch" onclick="changeTab('watch')">📋 Watch</div>
+        <div class="b-btn" id="b-options" onclick="changeTab('options')">⛓️ F&O</div>
+        <div class="b-btn" id="b-algos" onclick="changeTab('algos')">🤖 Algos</div>
+        <div class="b-btn" id="b-pos" onclick="changeTab('pos')">💼 Portfolio</div>
+        <div class="b-btn" id="b-acc" onclick="changeTab('acc')">👤 Account</div>
     </div>
-
-    <h3 class="section-title">NEW TRADE — ENTRY APPROVAL</h3>
-
-    <div class="card">
-
-        <div class="grid">
-
-            <div>
-                <label>Instrument</label>
-                <select id="instrument">
-                    <option value="NIFTY">NIFTY</option>
-                </select>
-            </div>
-
-            <div>
-                <label>Option Type</label>
-                <select id="optionType">
-                    <option value="CE">CALL (CE)</option>
-                    <option value="PE">PUT (PE)</option>
-                </select>
-            </div>
-
-            <div>
-                <label>Strike Price</label>
-                <input id="strike" type="number" placeholder="مثلاً 26000">
-            </div>
-
-            <div>
-                <label>Expiry</label>
-                <input id="expiry" type="date">
-            </div>
-
-            <div>
-                <label>Option Premium (₹)</label>
-                <input id="entryPrice" type="number" step="0.05"
-                       placeholder="مثلاً 120">
-            </div>
-
-            <div>
-                <label>Current Contract Lot Size</label>
-                <input id="lotSize" type="number" min="1"
-                       placeholder="موجودہ لاٹ سائز درج کریں">
-            </div>
-
-            <div>
-                <label>Number of Lots</label>
-                <input id="lots" type="number" min="1" value="1">
-            </div>
-
-            <div>
-                <label>Stop Loss Premium (₹)</label>
-                <input id="stopLoss" type="number" step="0.05"
-                       placeholder="مثلاً 118">
-            </div>
-
-            <div>
-                <label>Target Premium (₹)</label>
-                <input id="target" type="number" step="0.05"
-                       placeholder="مثلاً 125">
-            </div>
-
-            <div>
-                <label>Trailing Stop Distance (₹)</label>
-                <input id="trailDistance" type="number"
-                       step="0.05" value="2">
-            </div>
-
-        </div>
-
-        <div id="riskPreview" class="status">
-            ٹریڈ کی تفصیلات درج کریں۔
-        </div>
-
-        <button class="primary" onclick="approveEntry()">
-            APPROVE PAPER ENTRY
-        </button>
-
-    </div>
-
-    <h3 class="section-title">OPEN POSITION & EXIT MONITOR</h3>
-
-    <div class="card">
-
-        <div id="positionArea">
-            ابھی کوئی اوپن پوزیشن نہیں ہے۔
-        </div>
-
-        <div id="quoteArea" style="display:none">
-
-            <label>نئی مارکیٹ قیمت درج کریں (₹)</label>
-
-            <input id="newQuote" type="number"
-                   step="0.05" placeholder="نئی قیمت">
-
-            <div class="actions">
-
-                <button class="primary" onclick="updateQuote()">
-                    UPDATE PRICE
-                </button>
-
-                <button class="danger" onclick="manualExit()">
-                    MANUAL EXIT
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <h3 class="section-title">TRADE HISTORY</h3>
-
-    <div class="card">
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>DATE</th>
-                        <th>OPTION</th>
-                        <th>ENTRY</th>
-                        <th>EXIT</th>
-                        <th>QUANTITY</th>
-                        <th>P&L</th>
-                        <th>REASON</th>
-                    </tr>
-                </thead>
-
-                <tbody id="history"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <h3 class="section-title">ALERTS & SYSTEM LOG</h3>
-
-    <div class="card">
-        <div id="notifications">
-            <div class="notice">سسٹم شروع ہو گیا ہے۔</div>
-        </div>
-    </div>
-
-    <h3 class="section-title">DATA MANAGEMENT</h3>
-
-    <div class="card">
-
-        <div class="small">
-            آپ کا پیپر ٹریڈنگ ڈیٹا اس براؤزر کے localStorage میں محفوظ ہوتا ہے۔
-            براؤزر ریفریش کرنے سے ڈیٹا ختم نہیں ہوگا۔
-        </div>
-
-        <div class="actions">
-
-            <button class="secondary" onclick="exportData()">
-                EXPORT BACKUP
-            </button>
-
-            <button class="secondary" onclick="document.getElementById('importFile').click()">
-                IMPORT BACKUP
-            </button>
-
-            <input type="file" id="importFile"
-                   accept=".json" style="display:none"
-                   onchange="importData(event)">
-
-            <button class="danger" onclick="resetAll()">
-                RESET ALL DATA
-            </button>
-
-        </div>
-
-    </div>
-
 </div>
 
-<footer>
-    KHAN AI TRADER | PAPER TRADING PROTOTYPE
-</footer>
+<!-- Trade Execution Modal -->
+<div class="modal-overlay" id="orderModal">
+    <div class="modal-card">
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid #262D3D; padding-bottom:10px; margin-bottom:12px;">
+            <div>
+                <strong id="mSym" style="font-size:16px;">SYMBOL</strong>
+                <div style="font-size:12px; color:#0ECB81;" id="mPrice">LTP: ₹0</div>
+            </div>
+            <button class="btn btn-gray" onclick="closeModal()">✕</button>
+        </div>
+
+        <div class="row-between">
+            <span style="color:#848E9C;">Quantity</span>
+            <input type="number" id="mQty" class="inp" style="width:110px; text-align:right; font-weight:700;" value="1" oninput="calcCost()">
+        </div>
+        <div class="row-between">
+            <span style="color:#848E9C;">Target Price (₹)</span>
+            <input type="number" id="mTarget" class="inp" style="width:110px; text-align:right; color:#0ECB81; font-weight:700;" step="0.5">
+        </div>
+        <div class="row-between">
+            <span style="color:#848E9C;">Stop Loss (₹)</span>
+            <input type="number" id="mSL" class="inp" style="width:110px; text-align:right; color:#F6465D; font-weight:700;" step="0.5">
+        </div>
+
+        <div style="background:#12161F; padding:10px; border-radius:6px; font-size:11px; margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between;"><span>Investment:</span><strong id="mCost">₹0</strong></div>
+            <div style="display:flex; justify-content:space-between; color:#0ECB81;"><span>Available Capital:</span><strong>₹<span id="mBal">5000</span></strong></div>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <button class="btn btn-green" style="flex:1; padding:12px;" onclick="placeManual('BUY')">MANUAL BUY</button>
+            <button class="btn btn-red" style="flex:1; padding:12px;" onclick="placeManual('SELL')">MANUAL SELL</button>
+        </div>
+        <button class="btn btn-blue" style="width:100%; padding:12px;" onclick="activateAlgo()">🤖 ACTIVATE AI ALGO BOT</button>
+    </div>
+</div>
 
 <script>
+    let db = JSON.parse(localStorage.getItem('khan_ai_trader_v6')) || {
+        capital: 5000,
+        dailyPnl: 0,
+        positions: [],
+        history: [],
+        algos: []
+    };
 
-/* =====================================
-   KHAN AI TRADER
-   PAPER TRADING ENGINE
-===================================== */
+    let currentTab = 'watch';
+    let selIndex = 'NIFTY';
+    let searchKey = '';
+    let currentAsset = null;
 
-const STORAGE_KEY = "KHAN_AI_TRADER_V2";
+    let indices = {
+        'NIFTY': { price: 25144.30, step: 50 },
+        'BANKNIFTY': { price: 51420.50, step: 100 },
+        'SENSEX': { price: 81592.45, step: 100 },
+        'CRUDEOIL': { price: 5840.00, step: 50 }
+    };
 
-const INITIAL_CAPITAL = 5000;
-const MAX_TRADE_RISK = 100;
-const DAILY_LOSS_LIMIT = 200;
+    let stocks = [
+        { sym: 'RELIANCE', exch: 'NSE', p: 2985.50 }, { sym: 'TCS', exch: 'NSE', p: 3920.00 },
+        { sym: 'HDFCBANK', exch: 'NSE', p: 1542.00 }, { sym: 'ICICIBANK', exch: 'NSE', p: 1090.00 },
+        { sym: 'INFY', exch: 'NSE', p: 1650.50 }, { sym: 'SBIN', exch: 'NSE', p: 765.40 },
+        { sym: 'BHARTIARTL', exch: 'NSE', p: 1240.00 }, { sym: 'ITC', exch: 'NSE', p: 432.10 },
+        { sym: 'TATAMOTORS', exch: 'NSE', p: 984.20 }, { sym: 'AXISBANK', exch: 'NSE', p: 1120.50 },
+        { sym: 'KOTAKBANK', exch: 'NSE', p: 1780.00 }, { sym: 'BAJFINANCE', exch: 'NSE', p: 6850.00 },
+        { sym: 'MARUTI', exch: 'NSE', p: 12450.00 }, { sym: 'SUNPHARMA', exch: 'NSE', p: 1580.00 },
+        { sym: 'ZOMATO', exch: 'NSE', p: 185.30 }, { sym: 'SUZLON', exch: 'BSE/NSE', p: 46.50 },
+        { sym: 'YESBANK', exch: 'BSE/NSE', p: 24.80 }, { sym: 'IRCTC', exch: 'NSE', p: 985.00 }
+    ];
 
-let state = {
-    balance: INITIAL_CAPITAL,
-    position: null,
-    history: [],
-    logs: [],
-    dailyPnl: 0,
-    dailyDate: getToday()
-};
-
-
-/* =====================================
-   DATE
-===================================== */
-
-function getToday() {
-    const d = new Date();
-
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-
-    return `${y}-${m}-${day}`;
-}
-
-
-/* =====================================
-   SAVE DATA
-===================================== */
-
-function saveState() {
-
-    try {
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(state)
-        );
-
-        return true;
-
-    } catch (error) {
-
-        alert("ڈیٹا محفوظ نہیں ہو سکا۔ براؤزر اسٹوریج چیک کریں۔");
-
-        return false;
+    function persist() {
+        localStorage.setItem('khan_ai_trader_v6', JSON.stringify(db));
     }
-}
 
+    // Live Ticks & Exit Rules Engine
+    setInterval(() => {
+        Object.keys(indices).forEach(k => {
+            indices[k].price = +(indices[k].price + (Math.random() - 0.48) * (indices[k].price * 0.001)).toFixed(2);
+        });
 
-/* =====================================
-   LOAD DATA
-===================================== */
+        stocks.forEach(s => {
+            s.p = +(s.p * (1 + (Math.random() - 0.49) * 0.003)).toFixed(2);
+        });
 
-function loadState() {
+        // Check Positions & Exit Rules (Target, SL, Trailing SL)
+        for (let i = db.positions.length - 1; i >= 0; i--) {
+            let p = db.positions[i];
+            let st = stocks.find(x => x.sym === p.sym);
+            p.ltp = st ? st.p : Math.max(5, +(p.ltp + (Math.random() - 0.48) * 3).toFixed(2));
+            p.highPrice = Math.max(p.highPrice || p.avg, p.ltp);
 
-    const saved = localStorage.getItem(STORAGE_KEY);
+            let currentPnl = (p.ltp - p.avg) * p.qty;
 
-    if (saved) {
-
-        try {
-
-            const loaded = JSON.parse(saved);
-
-            if (
-                loaded &&
-                typeof loaded === "object" &&
-                Array.isArray(loaded.history) &&
-                Array.isArray(loaded.logs)
-            ) {
-
-                state = {
-                    ...state,
-                    ...loaded
-                };
-
+            // Trailing Stop Loss Rule
+            if (currentPnl > 20 && p.ltp > (p.avg + 2)) {
+                let newTrail = +(p.ltp - 2).toFixed(2);
+                if (newTrail > p.sl) p.sl = newTrail;
             }
 
-        } catch (error) {
-
-            console.error("Saved data could not be loaded.", error);
-
+            if (p.side === 'BUY') {
+                if (p.ltp >= p.target) closePos(i, 'TARGET HIT 🎯');
+                else if (p.ltp <= p.sl) closePos(i, 'STOP LOSS HIT 🛑');
+            } else {
+                if (p.ltp <= p.target) closePos(i, 'TARGET HIT 🎯');
+                else if (p.ltp >= p.sl) closePos(i, 'STOP LOSS HIT 🛑');
+            }
         }
 
+        // Run AI Algorithmic Bots
+        db.algos.forEach(a => {
+            if (!a.active) return;
+            if (db.positions.some(x => x.sym === a.sym)) return;
+
+            let stObj = stocks.find(x => x.sym === a.sym);
+            let lp = stObj ? stObj.p : 100;
+            let cost = lp * a.qty;
+
+            if (Math.random() < 0.2 && db.capital >= cost && db.dailyPnl > -200) {
+                db.capital = +(db.capital - cost).toFixed(2);
+                db.positions.push({
+                    sym: a.sym,
+                    side: 'BUY',
+                    qty: a.qty,
+                    avg: lp,
+                    ltp: lp,
+                    highPrice: lp,
+                    target: +(lp * 1.03).toFixed(2),
+                    sl: +(lp * 0.985).toFixed(2),
+                    mode: 'AI Bot'
+                });
+                persist();
+            }
+        });
+
+        // Daily Loss Limit (₹200)
+        if (db.dailyPnl <= -200 && db.positions.length > 0) {
+            db.positions = [];
+            alert('Daily Loss Limit ₹200 reached! All positions auto-closed.');
+            persist();
+        }
+
+        renderTicker();
+        if (currentTab === 'pos' || currentTab === 'watch' || currentTab === 'algos') renderMain();
+    }, 1500);
+
+    function initApp() {
+        renderTicker();
+        renderMain();
     }
 
-    // نئے دن کے لیے روزانہ نقصان کا حساب ری سیٹ ہوگا۔
-    // پرانی ٹریڈ ہسٹری محفوظ رہے گی۔
-
-    if (state.dailyDate !== getToday()) {
-
-        state.dailyDate = getToday();
-        state.dailyPnl = 0;
-
-        addLog("نیا دن شروع: روزانہ P&L کاؤنٹر ری سیٹ ہوا۔");
-
+    function renderTicker() {
+        let bar = document.getElementById('topTickerBar');
+        if (!bar) return;
+        let h = '';
+        Object.keys(indices).forEach(k => {
+            let cls = selIndex === k ? 'active' : '';
+            h += `<div class="idx-pill ${cls}" onclick="selIndex='${k}'; renderTicker();">
+                <div style="color:#848E9C; font-size:9px;">${k}</div>
+                <div class="up">₹${indices[k].price.toLocaleString('en-IN')}</div>
+            </div>`;
+        });
+        bar.innerHTML = h;
     }
 
-    saveState();
-}
+    function changeTab(t) {
+        currentTab = t;
+        document.querySelectorAll('.n-tab').forEach(el => el.classList.remove('active'));
+        let topEl = document.getElementById('t-' + t);
+        if (topEl) topEl.classList.add('active');
 
+        document.querySelectorAll('.b-btn').forEach(el => el.classList.remove('active'));
+        let botEl = document.getElementById('b-' + t);
+        if (botEl) botEl.classList.add('active');
 
-/* =====================================
-   LOG SYSTEM
-===================================== */
-
-function addLog(message) {
-
-    state.logs.unshift({
-        message,
-        time: new Date().toLocaleString()
-    });
-
-    state.logs = state.logs.slice(0, 50);
-
-    saveState();
-
-    renderLogs();
-}
-
-
-/* =====================================
-   FORMAT
-===================================== */
-
-function money(value) {
-
-    return "₹" + Number(value).toFixed(2);
-
-}
-
-
-/* =====================================
-   ENTRY PREVIEW
-===================================== */
-
-function calculateEntry() {
-
-    const entry = Number(
-        document.getElementById("entryPrice").value
-    );
-
-    const sl = Number(
-        document.getElementById("stopLoss").value
-    );
-
-    const lot = Number(
-        document.getElementById("lotSize").value
-    );
-
-    const lots = Number(
-        document.getElementById("lots").value
-    );
-
-    const qty = lot * lots;
-
-    const risk = (entry - sl) * qty;
-
-    const preview = document.getElementById("riskPreview");
-
-    if (
-        entry <= 0 ||
-        sl <= 0 ||
-        lot <= 0 ||
-        lots <= 0
-    ) {
-
-        preview.innerHTML =
-            "انٹری، اسٹاپ لاس، لاٹ سائز اور لاٹس درج کریں۔";
-
-        return;
+        renderMain();
     }
 
-    if (sl >= entry) {
-
-        preview.innerHTML =
-            '<span class="red">غلط اسٹاپ لاس: اسٹاپ لاس انٹری سے کم ہونا چاہیے۔</span>';
-
-        return;
+    function openModal(sym, price) {
+        currentAsset = { sym, price };
+        document.getElementById('mSym').innerText = sym;
+        document.getElementById('mPrice').innerText = 'Live Price: ₹ ' + price.toFixed(2);
+        document.getElementById('mBal').innerText = db.capital.toLocaleString('en-IN');
+        document.getElementById('mQty').value = Math.max(1, Math.ceil(1000 / price));
+        document.getElementById('mTarget').value = +(price * 1.03).toFixed(2);
+        document.getElementById('mSL').value = +(price * 0.985).toFixed(2);
+        calcCost();
+        document.getElementById('orderModal').style.display = 'flex';
     }
 
-    preview.innerHTML =
-        "Quantity: " + qty +
-        " | Estimated Risk: " + money(risk);
-
-    preview.className =
-        risk <= MAX_TRADE_RISK
-        ? "status green"
-        : "status red";
-
-}
-
-
-[
-    "entryPrice",
-    "stopLoss",
-    "lotSize",
-    "lots"
-].forEach(id => {
-
-    document.getElementById(id).addEventListener(
-        "input",
-        calculateEntry
-    );
-
-});
-
-
-/* =====================================
-   APPROVE ENTRY
-===================================== */
-
-function approveEntry() {
-
-    if (state.position) {
-
-        alert("ایک وقت میں صرف ایک پوزیشن کی اجازت ہے۔");
-
-        return;
+    function closeModal() {
+        document.getElementById('orderModal').style.display = 'none';
     }
 
-    if (state.dailyPnl <= -DAILY_LOSS_LIMIT) {
-
-        alert("آج کی ₹200 نقصان کی حد پوری ہو چکی ہے۔");
-
-        return;
+    function calcCost() {
+        if (!currentAsset) return;
+        let q = parseInt(document.getElementById('mQty').value) || 1;
+        let val = +(currentAsset.price * q).toFixed(2);
+        document.getElementById('mCost').innerText = '₹ ' + val.toLocaleString('en-IN');
     }
 
-    const entry = Number(
-        document.getElementById("entryPrice").value
-    );
+    function placeManual(side) {
+        let q = parseInt(document.getElementById('mQty').value) || 1;
+        let cost = +(currentAsset.price * q).toFixed(2);
+        let target = parseFloat(document.getElementById('mTarget').value);
+        let sl = parseFloat(document.getElementById('mSL').value);
 
-    const sl = Number(
-        document.getElementById("stopLoss").value
-    );
+        if (cost < 500) { alert('Minimum ₹500 ka trade zaroori hai!'); return; }
+        if (cost > db.capital) { alert('Insufficient capital!'); return; }
 
-    const target = Number(
-        document.getElementById("target").value
-    );
+        db.capital = +(db.capital - cost).toFixed(2);
+        db.positions.push({
+            sym: currentAsset.sym,
+            side: side,
+            qty: q,
+            avg: currentAsset.price,
+            ltp: currentAsset.price,
+            highPrice: currentAsset.price,
+            target: target,
+            sl: sl,
+            mode: 'Manual'
+        });
 
-    const lot = Number(
-        document.getElementById("lotSize").value
-    );
-
-    const lots = Number(
-        document.getElementById("lots").value
-    );
-
-    const strike = Number(
-        document.getElementById("strike").value
-    );
-
-    const expiry = document.getElementById("expiry").value;
-
-    const instrument = document.getElementById("instrument").value;
-
-    const optionType = document.getElementById("optionType").value;
-
-    const trail = Number(
-        document.getElementById("trailDistance").value
-    );
-
-    if (
-        !entry ||
-        !sl ||
-        !target ||
-        !lot ||
-        !lots ||
-        !strike ||
-        !expiry ||
-        !trail
-    ) {
-
-        alert("تمام ضروری معلومات درج کریں۔");
-
-        return;
+        persist();
+        closeModal();
+        changeTab('pos');
     }
 
-    if (sl >= entry || target <= entry) {
+    function activateAlgo() {
+        let q = parseInt(document.getElementById('mQty').value) || 1;
+        let cost = +(currentAsset.price * q).toFixed(2);
+        if (cost < 500) { alert('Minimum ₹500 capital zaroori hai!'); return; }
 
-        alert("اسٹاپ لاس انٹری سے کم اور ٹارگٹ انٹری سے زیادہ ہونا چاہیے۔");
+        let ex = db.algos.find(x => x.sym === currentAsset.sym);
+        if (ex) { ex.active = true; ex.qty = q; }
+        else { db.algos.push({ sym: currentAsset.sym, price: currentAsset.price, qty: q, active: true }); }
 
-        return;
+        persist();
+        closeModal();
+        alert(`AI Bot activated for ${currentAsset.sym}!`);
+        changeTab('algos');
     }
 
-    if (trail <= 0) {
+    function closePos(idx, reason = 'Manual Exit') {
+        let p = db.positions[idx];
+        let pnl = p.side === 'BUY' ? (p.ltp - p.avg) * p.qty : (p.avg - p.ltp) * p.qty;
 
-        alert("ٹریلنگ اسٹاپ کی ویلیو درست درج کریں۔");
+        db.capital = +(db.capital + (p.avg * p.qty) + pnl).toFixed(2);
+        db.dailyPnl = +(db.dailyPnl + pnl).toFixed(2);
 
-        return;
+        db.history.unshift({
+            time: new Date().toLocaleTimeString(),
+            sym: p.sym,
+            side: p.side,
+            qty: p.qty,
+            inP: p.avg,
+            outP: p.ltp,
+            pnl: +pnl.toFixed(2),
+            reason: reason
+        });
+
+        db.positions.splice(idx, 1);
+        persist();
+        renderMain();
     }
 
-    const quantity = lot * lots;
+    function renderMain() {
+        let box = document.getElementById('mainArea');
+        if (!box) return;
 
-    const risk = (entry - sl) * quantity;
+        if (currentTab === 'watch') {
+            let filtered = stocks.filter(s => s.sym.toLowerCase().includes(searchKey.toLowerCase()));
+            let h = `<div class="search-box"><input type="text" class="inp" placeholder="Search Shares..." value="${searchKey}" oninput="searchKey=this.value; renderMain();"></div>`;
+            filtered.forEach(s => {
+                h += `<div class="stock-row">
+                    <div onclick="openModal('${s.sym}', ${s.p})" style="flex:1; cursor:pointer;">
+                        <div style="font-weight:700;">${s.sym}</div>
+                        <div style="font-size:11px; color:#848E9C;">${s.exch} • Tap to Trade</div>
+                    </div>
+                    <div style="text-align:right; margin-right:10px;"><div class="up">₹${s.p}</div></div>
+                    <button class="btn btn-blue" onclick="openModal('${s.sym}', ${s.p})">Trade</button>
+                </div>`;
+            });
+            box.innerHTML = h;
 
-    if (risk > MAX_TRADE_RISK) {
+        } else if (currentTab === 'options') {
+            let idx = indices[selIndex];
+            let atm = Math.round(idx.price / idx.step) * idx.step;
+            let strikes = [atm - idx.step, atm, atm + idx.step];
 
-        alert(
-            "ٹریڈ کا رسک ₹100 سے زیادہ ہے۔\n" +
-            "موجودہ رسک: " + money(risk)
-        );
+            let h = `<div style="padding:12px; background:#181D27; font-weight:700; display:flex; justify-content:space-between;">
+                <span>${selIndex} OPTION CHAIN</span><span style="color:#F0B90B;">Spot: ₹${idx.price}</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 0.8fr 1fr; text-align:center; background:#151A24; padding:8px; font-size:11px; color:#848E9C; font-weight:700;">
+                <div>CALL (CE)</div><div>STRIKE</div><div>PUT (PE)</div>
+            </div>`;
+            strikes.forEach(st => {
+                let ce = +(100 + Math.random() * 20).toFixed(2);
+                let pe = +(95 + Math.random() * 20).toFixed(2);
+                h += `<div style="display:grid; grid-template-columns:1fr 0.8fr 1fr; text-align:center; border-bottom:1px solid #1E232F; font-size:13px; align-items:center;">
+                    <div style="padding:12px; color:#0ECB81; cursor:pointer;" onclick="openModal('${selIndex} ${st} CE', ${ce})">₹${ce}</div>
+                    <div style="background:#181D27; padding:12px; font-weight:700; color:#F0B90B;">${st}</div>
+                    <div style="padding:12px; color:#F6465D; cursor:pointer;" onclick="openModal('${selIndex} ${st} PE', ${pe})">₹${pe}</div>
+                </div>`;
+            });
+            box.innerHTML = h;
 
-        return;
+        } else if (currentTab === 'algos') {
+            let h = `<div style="padding:14px; font-weight:700;">ACTIVE AI ALGO BOTS (${db.algos.length})</div>`;
+            if (db.algos.length === 0) {
+                h += `<div style="padding:30px; text-align:center; color:#848E9C; font-size:13px;">Watchlist ya Option Chain se kisi bhi asset par click karke Bot chalu karein.</div>`;
+            } else {
+                db.algos.forEach((a, i) => {
+                    h += `<div class="stock-row">
+                        <div><strong>${a.sym} Bot</strong><div style="font-size:11px; color:#0ECB81;">Qty: ${a.qty}</div></div>
+                        <button class="btn ${a.active ? 'btn-red' : 'btn-green'}" onclick="db.algos[${i}].active=!db.algos[${i}].active; persist(); renderMain();">${a.active ? 'STOP' : 'START'}</button>
+                    </div>`;
+                });
+            }
+            box.innerHTML = h;
+
+        } else if (currentTab === 'pos') {
+            let mtm = 0;
+            db.positions.forEach(p => { mtm += p.side === 'BUY' ? (p.ltp - p.avg) * p.qty : (p.avg - p.ltp) * p.qty; });
+            let h = `<div style="padding:14px; background:#181D27; text-align:center; border-bottom:1px solid #262D3D;">
+                <div style="font-size:11px; color:#848E9C;">PORTFOLIO LIVE MTM</div>
+                <div style="font-size:22px; font-weight:800;" class="${mtm >= 0 ? 'up' : 'down'}">${mtm >= 0 ? '+' : ''}₹${mtm.toFixed(2)}</div>
+                <div style="font-size:11px; color:#848E9C; margin-top:4px;">Capital: <strong>₹${db.capital.toLocaleString('en-IN')}</strong> | Daily P&L: ₹${db.dailyPnl}</div>
+            </div>`;
+            if (db.positions.length === 0) {
+                h += `<div style="text-align:center; color:#848E9C; margin-top:40px; font-size:13px;">No open positions.</div>`;
+            } else {
+                db.positions.forEach((p, idx) => {
+                    let pnl = p.side === 'BUY' ? (p.ltp - p.avg) * p.qty : (p.avg - p.ltp) * p.qty;
+                    h += `<div class="stock-row">
+                        <div>
+                            <div style="font-weight:700;">${p.sym} <span style="font-size:10px; background:#2B3139; padding:2px 6px; border-radius:4px;">${p.side}</span></div>
+                            <div style="font-size:11px; color:#848E9C;">In: ₹${p.avg} | LTP: ₹${p.ltp} | Qty: ${p.qty}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="${pnl >= 0 ? 'up' : 'down'}" style="font-size:14px;">${pnl >= 0 ? '+' : ''}₹${pnl.toFixed(2)}</div>
+                            <button class="btn btn-red" style="margin-top:4px;" onclick="closePos(${idx})">EXIT</button>
+                        </div>
+                    </div>`;
+                });
+            }
+            box.innerHTML = h;
+
+        } else if (currentTab === 'acc') {
+            box.innerHTML = `<div style="margin:12px; background:#181D27; padding:14px; border-radius:8px;">
+                <div style="font-size:12px; color:#848E9C;">PAPER CAPITAL</div>
+                <div style="font-size:24px; font-weight:800; color:#0ECB81; margin:4px 0;">₹${db.capital.toLocaleString('en-IN')}</div>
+                <button class="btn btn-gray" style="width:100%; margin-top:10px;" onclick="if(confirm('Reset account?')){localStorage.removeItem('khan_ai_trader_v6'); location.reload();}">Reset to ₹5,000</button>
+            </div>
+            <div style="padding:10px 14px; font-weight:700; font-size:13px; color:#848E9C;">CLOSED TRADES HISTORY</div>`;
+            if (db.history.length === 0) {
+                box.innerHTML += `<div style="padding:20px; text-align:center; color:#848E9C; font-size:12px;">No history yet.</div>`;
+            } else {
+                db.history.forEach(log => {
+                    box.innerHTML += `<div class="stock-row">
+                        <div>
+                            <div style="font-weight:700; font-size:13px;">${log.sym} (${log.side} • ${log.qty} Qty)</div>
+                            <div style="font-size:11px; color:#848E9C;">In: ₹${log.inP} → Out: ₹${log.outP} | ${log.reason}</div>
+                        </div>
+                        <div class="${log.pnl >= 0 ? 'up' : 'down'}" style="font-size:13px;">${log.pnl >= 0 ? '+' : ''}₹${log.pnl}</div>
+                    </div>`;
+                });
+            }
+        }
     }
-
-    const requiredCapital = entry * quantity;
-
-    if (requiredCapital > state.balance) {
-
-        alert("آپ کے دستیاب سرمائے سے زیادہ رقم درکار ہے۔");
-
-        return;
-    }
-
-    const confirmed = confirm(
-        "کیا آپ یہ پیپر ٹریڈ منظور کرتے ہیں؟\n\n" +
-        instrument + " " + strike + " " + optionType +
-        "\nEntry: " + money(entry) +
-        "\nStop Loss: " + money(sl) +
-        "\nTarget: " + money(target) +
-        "\nQuantity: " + quantity +
-        "\nRisk: " + money(risk)
-    );
-
-    if (!confirmed) return;
-
-    state.position = {
-
-        id: crypto.randomUUID(),
-
-        instrument,
-        optionType,
-        strike,
-        expiry,
-
-        entry,
-        ltp: entry,
-
-        stopLoss: sl,
-        target,
-
-        quantity,
-        lotSize: lot,
-        lots,
-
-        trailDistance: trail,
-        highestPrice: entry,
-        trailingStop: null,
-
-        previousQuote: entry,
-        lowerTicks: 0,
-
-        entryTime: new Date().toISOString(),
-
-        risk
-    };
-
-    saveState();
-
-    addLog("نئی پیپر پوزیشن منظور ہوئی۔");
-
-    render();
-
-}
-
-
-/* =====================================
-   UPDATE PRICE
-===================================== */
-
-function updateQuote() {
-
-    if (!state.position) return;
-
-    const input = document.getElementById("newQuote");
-
-    const price = Number(input.value);
-
-    if (!price || price <= 0) {
-
-        alert("درست قیمت درج کریں۔");
-
-        return;
-    }
-
-    const p = state.position;
-
-    if (price < p.previousQuote) {
-
-        p.lowerTicks++;
-
-    } else {
-
-        p.lowerTicks = 0;
-
-    }
-
-    p.previousQuote = price;
-
-    p.ltp = price;
-
-    // Highest price tracking
-
-    if (price > p.highestPrice) {
-
-        p.highestPrice = price;
-
-    }
-
-    // Trailing stop
-
-    const newTrailingStop =
-        p.highestPrice - p.trailDistance;
-
-    if (
-        newTrailingStop > p.stopLoss &&
-        (
-            p.trailingStop === null ||
-            newTrailingStop > p.trailingStop
-        )
-    ) {
-
-        p.trailingStop = newTrailingStop;
-
-        addLog(
-            "Trailing Stop Updated: " +
-            money(p.trailingStop)
-        );
-
-    }
-
-    saveState();
-
-    checkExit();
-
-    input.value = "";
-
-    render();
-
-}
-
-
-/* =====================================
-   AUTOMATIC EXIT CONDITIONS
-===================================== */
-
-function checkExit() {
-
-    const p = state.position;
-
-    if (!p) return;
-
-    // Target
-
-    if (p.ltp >= p.target) {
-
-        closePosition("TARGET HIT");
-
-        return;
-    }
-
-    // Protective Stop
-
-    if (p.ltp <= p.stopLoss) {
-
-        closePosition("STOP LOSS");
-
-        return;
-    }
-
-    // Trailing Stop
-
-    if (
-        p.trailingStop !== null &&
-        p.ltp <= p.trailingStop
-    ) {
-
-        closePosition("TRAILING STOP");
-
-        return;
-    }
-
-    // Early weakness exit:
-    // قیمت انٹری سے اوپر جانے کے بعد
-    // مسلسل تین نیچے کے ticks پر exit
-
-    const favourableMove =
-        p.highestPrice - p.entry;
-
-    if (
-        favourableMove >= p.trailDistance &&
-        p.lowerTicks >= 3
-    ) {
-
-        closePosition("EARLY WEAKNESS EXIT");
-
-        return;
-    }
-
-}
-
-
-/* =====================================
-   MANUAL EXIT
-===================================== */
-
-function manualExit() {
-
-    if (!state.position) return;
-
-    if (!confirm("کیا آپ پوزیشن بند کرنا چاہتے ہیں؟")) {
-
-        return;
-    }
-
-    closePosition("MANUAL EXIT");
-
-}
-
-
-/* =====================================
-   CLOSE POSITION
-===================================== */
-
-function closePosition(reason) {
-
-    const p = state.position;
-
-    if (!p) return;
-
-    const pnl =
-        (p.ltp - p.entry) * p.quantity;
-
-    const trade = {
-
-        id: p.id,
-
-        date: new Date().toLocaleString(),
-
-        instrument: p.instrument,
-
-        option:
-            p.strike + " " + p.optionType,
-
-        entry: p.entry,
-
-        exit: p.ltp,
-
-        quantity: p.quantity,
-
-        pnl,
-
-        reason
-
-    };
-
-    // Sale proceeds and P&L accounting:
-    // Entry amount was reserved at entry.
-
-    state.balance +=
-        (p.ltp * p.quantity);
-
-    state.balance +=
-        -(p.entry * p.quantity);
-
-    state.balance +=
-        (p.entry * p.quantity);
-
-    // Actual net accounting:
-    // Initial capital less entry cost,
-    // then exit proceeds.
-
-    state.history.unshift(trade);
-
-    state.dailyPnl += pnl;
-
-    state.position = null;
-
-    saveState();
-
-    addLog(
-        "Position Closed: " +
-        reason +
-        " | P&L: " + money(pnl)
-    );
-
-    render();
-
-}
-
-
-/* =====================================
-   RENDER DASHBOARD
-===================================== */
-
-function render() {
-
-    const p = state.position;
-
-    let openPnl = 0;
-
-    if (p) {
-
-        openPnl =
-            (p.ltp - p.entry) * p.quantity;
-
-    }
-
-    document.getElementById("balance").innerText =
-        money(state.balance);
-
-    document.getElementById("openPnl").innerText =
-        money(openPnl);
-
-    document.getElementById("dailyPnl").innerText =
-        money(state.dailyPnl);
-
-    document.getElementById("openPnl").className =
-        "value " + (openPnl >= 0 ? "green" : "red");
-
-    document.getElementById("dailyPnl").className =
-        "value " + (state.dailyPnl >= 0 ? "green" : "red");
-
-    renderPosition();
-
-    renderHistory();
-
-    renderLogs();
-
-}
-
-
-/* =====================================
-   POSITION DISPLAY
-===================================== */
-
-function renderPosition() {
-
-    const area =
-        document.getElementById("positionArea");
-
-    const quoteArea =
-        document.getElementById("quoteArea");
-
-    const p = state.position;
-
-    if (!p) {
-
-        area.innerHTML =
-         
+</script>
+</body>
+</html>
