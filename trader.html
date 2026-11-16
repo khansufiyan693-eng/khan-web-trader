@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KHAN AI TRADER - Live Terminal</title>
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { margin: 0; padding: 0; background-color: #0B0E14; color: #EAECEF; user-select: none; }
+        .app { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; height: 100vh; background: #12161F; position: relative; }
+        
+        /* Top Search & Status */
+        .header-top { background: #181D27; padding: 10px 14px; border-bottom: 1px solid #262D3D; display: flex; align-items: center; gap: 10px; }
+        .search-box { flex: 1; background: #12161F; border: 1px solid #2B3139; border-radius: 8px; display: flex; align-items: center; padding: 8px 12px; }
+        .search-box input { background: transparent; border: none; color: #FFF; font-size: 13px; width: 100%; outline: none; }
+        .cap-badge { background: #0ECB8120; color: #0ECB81; border: 1px solid #0ECB8150; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+
+        /* Index Ticker */
+        .ticker-scroll { display: flex; background: #181D27; padding: 10px 14px; gap: 10px; overflow-x: auto; border-bottom: 1px solid #262D3D; scrollbar-width: none; }
+        .ticker-card { background: #151A24; padding: 8px 12px; border-radius: 6px; min-width: 135px; border: 1px solid #262D3D; cursor: pointer; flex-shrink: 0; }
+        .ticker-title { font-size: 10px; color: #848E9C; font-weight: 700; display: flex; justify-content: space-between; }
+        .ticker-val { font-size: 13px; font-weight: 700; margin-top: 3px; }
+        .up { color: #0ECB81; font-weight: 700; }
+        .down { color: #F6465D; font-weight: 700; }
+
+        /* Main View */
+        .main { flex: 1; overflow-y: auto; padding-bottom: 80px; background: #12161F; }
+        .section-title { padding: 14px 14px 6px 14px; font-size: 13px; font-weight: 700; color: #848E9C; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Stock Rows */
+        .stock-row { padding: 12px 14px; border-bottom: 1px solid #1E232F; display: flex; justify-content: space-between; align-items: center; background: #12161F; }
+        .s-name { font-size: 14px; font-weight: 700; }
+        .s-sub { font-size: 11px; color: #848E9C; margin-top: 2px; }
+        .s-price-col { text-align: right; }
+        .s-ltp { font-size: 14px; font-weight: 700; }
+        .s-chg { font-size: 11px; margin-top: 2px; }
+
+        /* Portfolio Tools */
+        .tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; }
+        .tool-card { background: #181D27; border: 1px solid #262D3D; padding: 12px 8px; border-radius: 8px; text-align: center; cursor: pointer; }
+        .tool-icon { font-size: 18px; margin-bottom: 4px; }
+        .tool-label { font-size: 11px; font-weight: 600; color: #C9D1D9; }
+
+        /* Buttons */
+        .btn { border: none; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; color: #FFF; }
+        .btn-blue { background: #3861FB; }
+        .btn-green { background: #0ECB81; color: #000; }
+        .btn-red { background: #F6465D; }
+        .btn-gray { background: #2B3139; color: #EAECEF; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #181D27; border-top: 1px solid #262D3D; display: flex; z-index: 50; }
+        .nav-item { flex: 1; padding: 8px 0; text-align: center; color: #848E9C; font-size: 10px; font-weight: 600; cursor: pointer; }
+        .nav-item.active { color: #3861FB; background: #151A24; }
+        .nav-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; justify-content: flex-end; flex-direction: column; }
+        .modal-box { background: #181D27; padding: 20px; border-top-left-radius: 16px; border-top-right-radius: 16px; border-top: 1px solid #2B3139; max-width: 480px; width: 100%; margin: 0 auto; }
+        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 13px; color: #848E9C; }
+        .inp { background: #12161F; border: 1px solid #2B3139; color: #FFF; padding: 8px 12px; border-radius: 6px; width: 130px; text-align: right; font-size: 14px; font-weight: 700; outline: none; }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <!-- Top Bar -->
+    <div class="header-top">
+        <div class="search-box">
+            <span style="margin-right:8px; color:#848E9C;">🔍</span>
+            <input type="text" id="globalSearch" placeholder="Search Nifty, Stocks..." oninput="handleSearch(this.value)">
+        </div>
+        <div class="cap-badge" onclick="switchNav('account')">₹<span id="topCap">5,000</span></div>
+    </div>
+
+    <!-- Index Ticker -->
+    <div class="ticker-scroll">
+        <div class="ticker-card" onclick="switchNav('options')">
+            <div class="ticker-title"><span>NIFTY</span><span style="color:#0ECB81;">F&O ></span></div>
+            <div class="ticker-val up" id="idx-NIFTY">₹25,144.30</div>
+            <div style="font-size:10px; color:#F6465D;">-155.05 (-0.61%)</div>
+        </div>
+        <div class="ticker-card" onclick="switchNav('options')">
+            <div class="ticker-title"><span>BANKNIFTY</span><span style="color:#0ECB81;">F&O ></span></div>
+            <div class="ticker-val up" id="idx-BANKNIFTY">₹61,030.10</div>
+            <div style="font-size:10px; color:#0ECB81;">+112.40 (+0.18%)</div>
+        </div>
+        <div class="ticker-card" onclick="switchNav('options')">
+            <div class="ticker-title"><span>SENSEX</span><span style="color:#848E9C;">BSE</span></div>
+            <div class="ticker-val down" id="idx-SENSEX">₹81,592.45</div>
+            <div style="font-size:10px; color:#F6465D;">-318.56 (-0.39%)</div>
+        </div>
+    </div>
+
+    <!-- Main Screen -->
+    <div class="main" id="mainScreen"></div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" id="nav-home" onclick="switchNav('home')"><span class="nav-icon">🏠</span>HOME</div>
+        <div class="nav-item" id="nav-watchlist" onclick="switchNav('watchlist')"><span class="nav-icon">⭐</span>WATCHLIST</div>
+        <div class="nav-item" id="nav-portfolio" onclick="switchNav('portfolio')"><span class="nav-icon">💼</span>PORTFOLIO</div>
+        <div class="nav-item" id="nav-orders" onclick="switchNav('orders')"><span class="nav-icon">📋</span>ORDERS</div>
+        <div class="nav-item" id="nav-account" onclick="switchNav('account')"><span class="nav-icon">👤</span>ACCOUNT</div>
+    </div>
+</div>
+
+<!-- Trade & Algo Drawer -->
+<div class="modal-overlay" id="tradeModal">
+    <div class="modal-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #262D3D; padding-bottom:10px; margin-bottom:14px;">
+            <div>
+                <strong id="mSym" style="font-size:16px;">SYMBOL</strong>
+                <div id="mPrice" style="font-size:12px; color:#0ECB81; margin-top:2px;">LTP: ₹0</div>
+            </div>
+            <button class="btn btn-gray" onclick="closeModal()">✕</button>
+        </div>
+
+        <div class="input-row">
+            <span>Quantity</span>
+            <input type="number" id="mQty" class="inp" value="1" oninput="calcCost()">
+        </div>
+        <div class="input-row">
+            <span>Profit Target (₹)</span>
+            <input type="number" id="mTarget" class="inp" style="color:#0ECB81;" step="0.5">
+        </div>
+        <div class="input-row">
+            <span>Stop Loss (₹)</span>
+            <input type="number" id="mSL" class="inp" style="color:#F6465D;" step="0.5">
+        </div>
+
+        <div style="background:#12161F; padding:10px; border-radius:6px; font-size:12px; margin-bottom:14px; display:flex; justify-content:space-between;">
+            <span style="color:#848E9C;">Total Cost: <strong id="mCost" style="color:#FFF;">₹0</strong></span>
+            <span style="color:#848E9C;">Balance: <strong style="color:#0ECB81;">₹<span id="mCapDisplay">5000</span></strong></span>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <button class="btn btn-green" style="flex:1; padding:12px;" onclick="executeTrade('BUY')">PAPER BUY</button>
+            <button class="btn btn-red" style="flex:1; padding:12px;" onclick="executeTrade('SELL')">PAPER SELL</button>
+        </div>
+        <button class="btn btn-blue" style="width:100%; padding:12px;" onclick="toggleStockAlgo()">🤖 START / STOP AI ALGO BOT</button>
+    </div>
+</div>
+
+<script>
+    // 1. Database with LocalStorage
+    let db = JSON.parse(localStorage.getItem('khan_trader_pro_final')) || {
+        capital: 5000,
+        dailyPnl: 0,
+        positions: [],
+        orders: [],
+        history: [],
+        algos: []
+    };
+
+    let currentNav = 'home';
+    let searchQuery = '';
+    let selectedAsset = null;
+
+    let idxPrices = { NIFTY: 25144.30, BANKNIFTY: 61030.10, SENSEX: 81592.45 };
+
+    let stocks = [
+        { sym: 'HORIZONIND', exch: 'NSE', p: 47.20, chg: '+1.70%', tag: 'interested' },
+        { sym: 'KARURVYSYA', exch: 'NSE', p: 381.55, chg: '+0.25%', tag: 'interested' },
+        { sym: 'SYLPH', exch: 'BSE', p: 0.22, chg: '0.00%', tag: 'interested' },
+        { sym: 'GVT&D', exch: 'NSE', p: 4420.00, chg: '+5.24%', tag: 'mover' },
+        { sym: 'POLICYBZR', exch: 'NSE', p: 1105.00, chg: '+5.23%', tag: 'mover' },
+        { sym: 'MCX', exch: 'NSE', p: 3720.00, chg: '+2.63%', tag: 'mover' },
+        { sym: 'SMT', exch: 'NSE', p: 533.95, chg: '+5.81%', tag: 'watch' },
+        { sym: 'CUPID', exch: 'NSE', p: 377.80, chg: '-1.82%', tag: 'watch' },
+        { sym: 'UTLSOLAR', exch: 'NSE', p: 347.05, chg: '-2.24%', tag: 'watch' },
+        { sym: 'RELIANCE', exch: 'NSE', p: 2985.50, chg: '+1.08%', tag: 'watch' },
+        { sym: 'SUZLON', exch: 'NSE', p: 46.50, chg: '+2.10%', tag: 'watch' }
+    ];
+
+    function persist() {
+        localStorage.setItem('khan_trader_pro_final', JSON.stringify(db));
+        document.getElementById('topCap').innerText = db.capital.toLocaleString('en-IN');
+    }
+
+    // 2. Non-Blocking Live Price Engine (Touch Friendly!)
+    setInterval(() => {
+        // Update Index Text Only (No full DOM rebuild)
+        Object.keys(idxPrices).forEach(k => {
+            idxPrices[k] = +(idxPrices[k] + (Math.random() - 0.48) * 4).toFixed(2);
+            let el = document.getElementById('idx-' + k);
+            if (el) el.innerText = '₹' + idxPrices[k].toLocaleString('en-IN');
+        });
+
+        // Update Stock Prices & Text Only
+        stocks.forEach(s => {
+            s.p = +(s.p * (1 + (Math.random() - 0.49) * 0.002)).toFixed(2);
+            let pEl = document.getElementById('price-' + s.sym);
+            if (pEl) pEl.innerText = '₹ ' + s.p.toLocaleString('en-IN');
+        });
+
+        // Evaluate Open Positions & 4 Exit Rules
+        let posUpdated = false;
+        for (let i = db.positions.length - 1; i >= 0; i--) {
+            let p = db.positions[i];
+            let found = stocks.find(x => x.sym === p.sym);
+            p.ltp = found ? found.p : Math.max(2, +(p.ltp + (Math.random() - 0.48) * 1.5).toFixed(2));
+            p.highPrice = Math.max(p.highPrice || p.avg, p.ltp);
+
+            let currentPnl = p.side === 'BUY' ? (p.ltp - p.avg) * p.qty : (p.avg - p.ltp) * p.qty;
+
+            // Update live P&L text in portfolio without breaking touch
+            let pnlEl = document.getElementById('pos-pnl-' + i);
+            let ltpEl = document.getElementById('pos-ltp-' + i);
+            if (pnlEl) {
+                pnlEl.innerText = (currentPnl >= 0 ? '+' : '') + '₹' + currentPnl.toFixed(2);
+                pnlEl.className = 's-ltp ' + (currentPnl >= 0 ? 'up' : 'down');
+            }
+            if (ltpEl) ltpEl.innerText = '₹' + p.ltp;
+
+            // Trailing Stop Loss
+            if (currentPnl > 20 && p.ltp > (p.avg + 2)) {
+                let newTrail = +(p.ltp - 2).toFixed(2);
+                if (newTrail > p.sl) p.sl = newTrail;
+            }
+
+            // Target & SL Checks
+            if (p.side === 'BUY') {
+                if (p.ltp >= p.target) { closePosition(i, 'PROFIT TARGET HIT 🎯'); posUpdated = true; }
+                else if (p.ltp <= p.sl) { closePosition(i, 'STOP LOSS HIT 🛑'); posUpdated = true; }
+            } else {
+                if (p.ltp <= p.target) { closePosition(i, 'PROFIT TARGET HIT 🎯'); posUpdated = true; }
+                else if (p.ltp >= p.sl) { closePosition(i, 'STOP LOSS HIT 🛑'); posUpdated = true; }
+            }
+        }
+
+        // Run AI Algorithmic Bots
+        db.algos.forEach(a => {
+            if (!a.active) return;
+            if (db.positions.some(x => x.sym === a.sym)) return;
+
+            let st = stocks.find(x => x.sym === a.sym);
+            let lp = st ? st.p : 100;
+            let cost = lp * a.qty;
+
+            if (Math.random() < 0.15 && db.capital >= cost && db.dailyPnl > -200) {
+                db.capital = +(db.capital - cost).toFixed(2);
+                db.positions.push({
+                    sym: a.sym,
+                    side: 'BUY',
+                    qty: a.qty,
+                    avg: lp,
+                    ltp: lp,
+                    highPrice: lp,
+                    target: +(lp * 1.04).toFixed(2),
+                    sl: +(lp * 0.98).toFixed(2),
+                    mode: 'AI Algo'
+                });
+                db.orders.unshift({ time: new Date().toLocaleTimeString(), sym: a.sym, side: 'BUY', qty: a.qty, price: lp, status: 'EXECUTED (Algo)' });
+                persist();
+                posUpdated = true;
+            }
+        });
+
+        // Daily Loss Limit (₹200)
+        if (db.dailyPnl <= -200 && db.positions.length > 0) {
+            db.positions = [];
+            alert('Daily Loss Limit ₹200 reached! All positions closed.');
+            persist();
+            posUpdated = true;
+        }
+
+        if (posUpdated && currentNav === 'portfolio') renderMain();
+    }, 1500);
+
+    // 3. Navigation & Screen Rendering
+    function switchNav(nav) {
+        currentNav = nav;
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        let el = document.getElementById('nav-' + nav);
+        if (el) el.classList.add('active');
+        renderMain();
+    }
+
+    function handleSearch(val) {
+        searchQuery = val;
+        if (currentNav !== 'watchlist' && currentNav !== 'home') switchNav('watchlist');
+        else renderMain();
+    }
+
+    function openModal(sym, price) {
+        selectedAsset = { sym, price };
+        document.getElementById('mSym').innerText = sym;
+        document.getElementById('mPrice').innerText = 'LTP: ₹ ' + price.toFixed(2);
+        document.getElementById('mCapDisplay').innerText = db.capital.toLocaleString('en-IN');
+        document.getElementById('mQty').value = Math.max(1, Math.ceil(500 / price));
+        document.getElementById('mTarget').value = +(price * 1.04).toFixed(2);
+        document.getElementById('mSL').value = +(price * 0.98).toFixed(2);
+        calcCost();
+        document.getElementById('tradeModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('tradeModal').style.display = 'none';
+    }
+
+    function calcCost() {
+        if (!selectedAsset) return;
+        let q = parseInt(document.getElementById('mQty').value) || 1;
+        let cost = +(selectedAsset.price * q).toFixed(2);
+        document.getElementById('mCost').innerText = '₹ ' + cost.toLocaleString('en-IN');
+    }
+
+    function executeTrade(side) {
+        let q = parseInt(document.getElementById('mQty').value) || 1;
+        let cost = +(selectedAsset.price * q).toFixed(2);
+        let target = parseFloat(document.getElementById('mTarget').value);
+        let sl = parseFloat(document.getElementById('mSL').value);
+
+        if (cost > db.capital) { alert('Insufficient paper capital!'); return; }
+
+        db.capital = +(db.capital - cost).toFixed(2);
+        db.positions.push({
+            sym: selectedAsset.sym,
+            side: side,
+            qty: q,
+            avg: selectedAsset.price,
+            ltp: selectedAsset.price,
+            highPrice: selectedAsset.price,
+            target: target,
+            sl: sl,
+            mode: 'Manual'
+        });
+
+        db.orders.unshift({
+            time: new Date().toLocaleTimeString(),
+            sym: selectedAsset.sym,
+            side: side,
+            qty: q,
+            price: selectedAsset.price,
+            status: 'EXECUTED'
+        });
+
+        persist();
+        closeModal();
+        switchNav('portfolio');
+    }
+
+    function toggleStockAlgo(symOverride, priceOverride) {
+        let sym = symOverride || selectedAsset.sym;
+        let qty = symOverride ? Math.max(1, Math.ceil(500 / priceOverride)) : (parseInt(document.getElementById('mQty').value) || 1);
+        
+        let ex = db.algos.find(x => x.sym === sym);
+        if (ex) {
+            ex.active = !ex.active;
+        } else {
+            db.algos.push({ sym: sym, qty: qty, active: true });
+        }
+        persist();
+        closeModal();
+        renderMain();
+    }
+
+    function closePosition(idx, reason) {
+        let p = db.positions[idx];
+        let pnl = p.side === 'BUY' ? (p.ltp - p.avg) * p.qty : (p.avg - p.ltp) * p.qty;
+        let refund = (p.avg * p.qty) + pnl;
+
+        db.capital = +(db.capital + refund).toFixed(2);
+        db.dailyPnl = +(db.dailyPnl + pnl).toFixed(2);
+
+        db.history.unshift({
+            time: new Date().toLocaleTimeString(),
+            sym: p.sym,
+            qty: p.qty,
+            inP: p.avg,
+            outP: p.ltp,
+            pnl: +pnl.toFixed(2),
+            reason: reason
+        });
+
+        db.positions.splice(idx, 1);
+        persist();
+        renderMain();
+    }
+
+    function renderMain() {
+        let screen = document.getElementById('mainScreen');
+        let filtered = stocks.filter(s => s.sym.toLowerCase().includes(searchQuery.toLowerCase()));
+
+        if (currentNav === 'home') {
+            let h = `
+                <div style="background:linear-gradient(135deg, #1E232F, #181D27); margin:12px 14px; padding:14px; border-radius:10px; border:1px solid #2B3139; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-size:13px; font-weight:700;">KHAN AI PAPER TERMINAL</div>
+                        <div style="font-size:12px; color:#0ECB81; margin-top:4px;">Capital: ₹${db.capital.toLocaleString('en-IN')} | Daily P&L: ₹${db.dailyPnl.toFixed(2)}</div>
+                    </div>
+                    <button class="btn btn-blue" onclick="switchNav('watchlist')">Trade Now</button>
+                </div>
+
+                <div class="section-title"><span>Stocks You're Interested In</span><span style="color:#3861FB; font-size:11px; cursor:pointer;" onclick="switchNav('watchlist')">View All ></span></div>
+            `;
+            filtered.filter(s => s.tag === 'interested').forEach(s => {
+                h += `
+                    <div class="stock-row" onclick="openModal('${s.sym}', ${s.p})">
+                        <div>
+                            <div class="s-name">${s.sym}</div>
+                            <div class="s-sub">${s.exch} • Tap to Trade</div>
+                        </div>
+                        <div class="s-price-col">
+                            <div class="s-ltp up" id="price-${s.sym}">₹ ${s.p.toLocaleString('en-IN')}</div>
+                            <div class="s-chg up">${s.chg}</div>
+                        </
