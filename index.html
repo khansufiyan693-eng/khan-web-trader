@@ -3,42 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KHAN AI TRADER - Simple & Fast</title>
+    <title>KHAN AI TRADER</title>
     <style>
         * { box-sizing: border-box; font-family: sans-serif; }
         body { margin: 0; background: #0B0E14; color: #FFF; padding-bottom: 70px; }
-        .header { background: #181D27; padding: 12px; font-size: 16px; font-weight: bold; border-bottom: 1px solid #262D3D; display: flex; justify-content: space-between; align-items: center; }
-        .card { background: #181D27; margin: 10px; padding: 12px; border-radius: 8px; border: 1px solid #262D3D; }
-        .stock-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #262D3D; }
-        .btn { border: none; padding: 8px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; color: #FFF; font-size: 12px; }
+        .header { background: #181D27; padding: 14px; font-size: 16px; font-weight: bold; border-bottom: 1px solid #262D3D; display: flex; justify-content: space-between; align-items: center; }
+        .card { background: #181D27; margin: 10px; padding: 14px; border-radius: 8px; border: 1px solid #262D3D; }
+        .stock-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #262D3D; }
+        .btn { border: none; padding: 8px 14px; border-radius: 5px; font-weight: bold; cursor: pointer; color: #FFF; font-size: 12px; }
         .btn-green { background: #0ECB81; color: #000; }
         .btn-blue { background: #3861FB; }
         .btn-red { background: #F6465D; }
         .nav { position: fixed; bottom: 0; left: 0; right: 0; background: #181D27; display: flex; border-top: 1px solid #262D3D; z-index: 100; }
         .nav-btn { flex: 1; text-align: center; padding: 12px 0; font-size: 11px; color: #848E9C; font-weight: bold; cursor: pointer; }
-        .nav-btn.active { color: #3861FB; }
+        .nav-btn.active { color: #3861FB; background: #12161F; }
         .up { color: #0ECB81; font-weight: bold; }
         .down { color: #F6465D; font-weight: bold; }
     </style>
 </head>
-<body onload="renderApp('watch')">
+<body>
 
     <div class="header">
         <span>KHAN AI TRADER</span>
         <span style="font-size: 13px; color: #0ECB81;">Capital: ₹<span id="topCap">5000</span></span>
     </div>
 
-    <div id="content" style="padding: 5px;"></div>
+    <!-- Content Area -->
+    <div id="contentBox" style="padding: 5px;"></div>
 
+    <!-- Navigation -->
     <div class="nav">
-        <div class="nav-btn active" id="n-watch" onclick="renderApp('watch')">Watchlist</div>
-        <div class="nav-btn" id="n-pos" onclick="renderApp('pos')">Positions</div>
-        <div class="nav-btn" id="n-algo" onclick="renderApp('algo')">Algo Bots</div>
-        <div class="nav-btn" id="n-acc" onclick="renderApp('acc')">Account</div>
+        <div class="nav-btn active" id="btn-watch" onclick="switchTab('watch')">Watchlist</div>
+        <div class="nav-btn" id="btn-pos" onclick="switchTab('pos')">Positions</div>
+        <div class="nav-btn" id="btn-algo" onclick="switchTab('algo')">Algo Bots</div>
+        <div class="nav-btn" id="btn-acc" onclick="switchTab('acc')">Account</div>
     </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('khan_simple_v1')) || {
+    let db = JSON.parse(localStorage.getItem('khan_fixed_v1')) || {
         capital: 5000,
         positions: [],
         algos: []
@@ -53,64 +55,20 @@
         { sym: 'ZOMATO', p: 185.30 }
     ];
 
-    function save() {
-        localStorage.setItem('khan_simple_v1', JSON.stringify(db));
+    function updateHeader() {
         document.getElementById('topCap').innerText = db.capital.toLocaleString('en-IN');
+        localStorage.setItem('khan_fixed_v1', JSON.stringify(db));
     }
 
-    setInterval(() => {
-        stocks.forEach(s => {
-            s.p = +(s.p * (1 + (Math.random() - 0.49) * 0.002)).toFixed(2);
-        });
-        db.positions.forEach(p => {
-            let found = stocks.find(x => x.sym === p.sym);
-            p.ltp = found ? found.p : p.ltp;
-        });
-        if(document.getElementById('posArea') || document.getElementById('watchArea')) {
-            // refresh current view smoothly
-        }
-    }, 1500);
-
-    function buyStock(sym, price) {
-        if(db.capital < price) {
-            alert('Balance kam hai!');
-            return;
-        }
-        db.capital = +(db.capital - price).toFixed(2);
-        db.positions.push({ sym: sym, qty: 1, avg: price, ltp: price });
-        save();
-        alert(sym + ' successfully buy ho gaya!');
-        renderApp('pos');
-    }
-
-    function exitPos(idx) {
-        let p = db.positions[idx];
-        let pnl = (p.ltp - p.avg) * p.qty;
-        db.capital = +(db.capital + (p.avg * p.qty) + pnl).toFixed(2);
-        db.positions.splice(idx, 1);
-        save();
-        renderApp('pos');
-    }
-
-    function toggleAlgo(sym) {
-        let ex = db.algos.find(x => x.sym === sym);
-        if(ex) {
-            ex.active = !ex.active;
-        } else {
-            db.algos.push({ sym: sym, active: true });
-        }
-        save();
-        renderApp('algo');
-    }
-
-    function renderApp(tab) {
+    function switchTab(tab) {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('n-' + tab).classList.add('active');
+        document.getElementById('btn-' + tab).classList.add('active');
 
-        let box = document.getElementById('content');
+        let box = document.getElementById('contentBox');
+        if (!box) return;
 
-        if(tab === 'watch') {
-            let h = `<div class="card"><div style="font-weight:bold; margin-bottom:10px;">Market Watchlist & Manual Trade</div>`;
+        if (tab === 'watch') {
+            let h = `<div class="card"><div style="font-weight:bold; margin-bottom:10px;">Market Watchlist</div>`;
             stocks.forEach(s => {
                 h += `
                     <div class="stock-row">
@@ -128,9 +86,9 @@
             h += `</div>`;
             box.innerHTML = h;
 
-        } else if(tab === 'pos') {
-            let h = `<div class="card" id="posArea"><div style="font-weight:bold; margin-bottom:10px;">Active Positions</div>`;
-            if(db.positions.length === 0) {
+        } else if (tab === 'pos') {
+            let h = `<div class="card"><div style="font-weight:bold; margin-bottom:10px;">Active Positions</div>`;
+            if (db.positions.length === 0) {
                 h += `<div style="color:#848E9C; text-align:center; padding:20px;">Koi open trade nahi hai. Watchlist se BUY karein.</div>`;
             } else {
                 db.positions.forEach((p, idx) => {
@@ -152,7 +110,7 @@
             h += `</div>`;
             box.innerHTML = h;
 
-        } else if(tab === 'algo') {
+        } else if (tab === 'algo') {
             let h = `<div class="card"><div style="font-weight:bold; margin-bottom:10px;">Algorithmic Bots</div>`;
             stocks.forEach(s => {
                 let isRun = db.algos.find(x => x.sym === s.sym && x.active);
@@ -169,17 +127,64 @@
             h += `</div>`;
             box.innerHTML = h;
 
-        } else if(tab === 'acc') {
+        } else if (tab === 'acc') {
             box.innerHTML = `
                 <div class="card">
                     <div style="font-size:12px; color:#848E9C;">Paper Trading Account</div>
                     <div style="font-size:22px; font-weight:bold; color:#0ECB81; margin:10px 0;">₹${db.capital.toLocaleString('en-IN')}</div>
-                    <button class="btn btn-blue" style="width:100%;" onclick="db.capital=5000; db.positions=[]; save(); renderApp('acc');">Reset Capital to ₹5,000</button>
+                    <button class="btn btn-blue" style="width:100%;" onclick="db.capital=5000; db.positions=[]; updateHeader(); switchTab('acc');">Reset Capital to ₹5,000</button>
                 </div>
             `;
         }
-        save();
+        updateHeader();
     }
+
+    function buyStock(sym, price) {
+        if (db.capital < price) {
+            alert('Balance kam hai!');
+            return;
+        }
+        db.capital = +(db.capital - price).toFixed(2);
+        db.positions.push({ sym: sym, qty: 1, avg: price, ltp: price });
+        updateHeader();
+        alert(sym + ' successfully buy ho gaya!');
+        switchTab('pos');
+    }
+
+    function exitPos(idx) {
+        let p = db.positions[idx];
+        let pnl = (p.ltp - p.avg) * p.qty;
+        db.capital = +(db.capital + (p.avg * p.qty) + pnl).toFixed(2);
+        db.positions.splice(idx, 1);
+        updateHeader();
+        switchTab('pos');
+    }
+
+    function toggleAlgo(sym) {
+        let ex = db.algos.find(x => x.sym === sym);
+        if (ex) {
+            ex.active = !ex.active;
+        } else {
+            db.algos.push({ sym: sym, active: true });
+        }
+        updateHeader();
+        switchTab('algo');
+    }
+
+    // Live Tick Simulation
+    setInterval(() => {
+        stocks.forEach(s => {
+            s.p = +(s.p * (1 + (Math.random() - 0.49) * 0.002)).toFixed(2);
+        });
+        db.positions.forEach(p => {
+            let found = stocks.find(x => x.sym === p.sym);
+            if (found) p.ltp = found.p;
+        });
+    }, 1500);
+
+    // Initial Load
+    switchTab('watch');
 </script>
 </body>
 </html>
+
