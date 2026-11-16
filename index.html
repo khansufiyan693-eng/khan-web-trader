@@ -1,502 +1,378 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>KHAN AI TRADER</title>
 <style>
+:root{
+ --bg:#080d18;--panel:#111a2b;--panel2:#172238;
+ --line:#263650;--text:#edf3ff;--muted:#8da0bd;
+ --green:#16d69a;--red:#ff5573;--blue:#5796ff;
+ --gold:#f5bd55;--radius:14px
+}
 *{box-sizing:border-box}
-body{margin:0;background:#07111f;color:#eaf2fc;font-family:Arial,sans-serif}
-header{background:#0d1b2c;padding:16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #29405a;position:sticky;top:0}
-.logo{font-size:20px;font-weight:bold}.logo span{color:#20d49a}
-.badge{font-size:11px;color:#ffc857}
-main{max-width:1100px;margin:auto;padding:12px}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:12px}
-.card,.box{background:#101d2e;border:1px solid #29405a;border-radius:12px;padding:13px}
-.label{font-size:12px;color:#91a5bd}
-.value{font-size:21px;font-weight:bold;margin-top:8px}
-.green{color:#20d49a}.red{color:#ff647c}.yellow{color:#ffc857}
-nav{display:flex;gap:6px;overflow:auto;margin:12px 0}
-button{border:0;border-radius:8px;padding:10px 13px;background:#203650;color:white;cursor:pointer}
-button.active,.buy{background:#20d49a;color:#062116;font-weight:bold}
-.sell{background:#a72f48;color:white}
-.panel{display:none}.panel.active{display:block}
-h2{font-size:17px;margin:0 0 12px}
-.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.tablewrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:650px}
-th,td{text-align:left;padding:11px 8px;border-bottom:1px solid #29405a;white-space:nowrap}
-th{color:#91a5bd;font-size:12px}
-input,select{width:100%;padding:11px;background:#081626;color:white;border:1px solid #29405a;border-radius:8px}
-.field{margin:10px 0}.field label{display:block;font-size:12px;color:#91a5bd;margin-bottom:5px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.notice{background:#302817;color:#ffe2a0;padding:11px;border-radius:8px;font-size:12px;margin:12px 0;line-height:1.5}
-.modal{display:none;position:fixed;inset:0;background:#000c;z-index:10;align-items:center;justify-content:center;padding:12px}
-.modal.show{display:flex}
-.dialog{width:min(440px,100%);background:#101d2e;border:1px solid #29405a;border-radius:14px;padding:17px}
-.small{padding:6px 9px;font-size:12px}
-@media(max-width:650px){.cards{grid-template-columns:1fr 1fr}.value{font-size:18px}}
+body{margin:0;background:var(--bg);color:var(--text);
+ font-family:Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{display:flex;min-height:100vh}
+.sidebar{width:245px;background:#0c1424;border-right:1px solid var(--line);
+ padding:20px 13px;position:fixed;inset:0 auto 0 0;overflow:auto;z-index:10}
+.brand{font-size:21px;font-weight:900;color:var(--green);padding:10px}
+.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:3px;margin-top:6px}
+.group{font-size:10px;color:var(--muted);padding:20px 12px 7px;letter-spacing:2px}
+.nav{display:flex;align-items:center;gap:12px;padding:12px;
+ border-radius:9px;color:#a9b9d2;margin:3px 0;font-size:13px;
+ cursor:pointer;border:0;background:transparent;width:100%;text-align:left}
+.nav:hover,.nav.active{background:#1b2a43;color:white}
+.nav.active{border-left:3px solid var(--green)}
+.main{margin-left:245px;width:calc(100% - 245px);padding:22px 26px}
+.topbar{display:flex;justify-content:space-between;align-items:center;
+ gap:15px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-size:23px;margin:0}
+.subtitle{font-size:12px;color:var(--muted);margin-top:6px}
+.status{font-size:11px;color:var(--gold);background:#342b19;padding:8px 12px;border-radius:20px}
+.grid{display:grid;gap:15px}
+.cards{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card,.box{background:var(--panel);border:1px solid var(--line);
+ border-radius:var(--radius);padding:17px;min-width:0}
+.label{font-size:11px;color:var(--muted)}
+.value{font-size:25px;font-weight:800;margin:12px 0 5px}
+.green{color:var(--green)}.red{color:var(--red)}.blue{color:var(--blue)}
+.gold{color:var(--gold)}
+.small{font-size:11px;color:var(--muted)}
+.section{margin-top:20px}
+.section-head{display:flex;justify-content:space-between;align-items:center;
+ gap:10px;margin-bottom:13px;flex-wrap:wrap}
+h2{font-size:16px;margin:0}
+.two{grid-template-columns:1.4fr 1fr}
+.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:12px}
+th,td{padding:13px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--muted);font-weight:500}
+td{color:#dce6f7}
+.table-wrap{overflow:auto}
+.btn{border:0;border-radius:8px;padding:10px 14px;
+ background:var(--blue);color:white;font-size:12px;font-weight:700}
+.btn.greenbtn{background:#087c60}
+.btn.redbtn{background:#a92e49}
+.btn.graybtn{background:#263650}
+.btn.goldbtn{background:#9a6b1e}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+input,select{background:#0b1424;border:1px solid var(--line);
+ color:white;padding:11px;border-radius:8px;width:100%;outline:none}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:7px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.page{display:none}.page.active{display:block}
+.badge{font-size:10px;padding:5px 8px;border-radius:20px;background:#20314c}
+.badge.good{color:var(--green);background:#10362f}
+.badge.bad{color:var(--red);background:#401d2b}
+.badge.warn{color:var(--gold);background:#3c3019}
+.signal{padding:14px;border:1px solid var(--line);border-radius:10px;margin-top:10px}
+.signal strong{font-size:14px}
+.progress{height:7px;background:#263650;border-radius:10px;overflow:hidden;margin-top:9px}
+.progress span{display:block;height:100%;background:var(--green)}
+.chart{height:210px;width:100%;display:block}
+.mobile-head{display:none}
+.notice{border:1px solid #765b2c;background:#302818;color:#f5d48c;
+ padding:12px;border-radius:10px;font-size:11px;line-height:1.6}
+.empty{text-align:center;padding:28px;color:var(--muted);font-size:12px}
+.switch{display:flex;justify-content:space-between;align-items:center;
+ padding:13px 0;border-bottom:1px solid var(--line);font-size:13px}
+@media(max-width:950px){
+ .cards{grid-template-columns:repeat(2,1fr)}
+ .two{grid-template-columns:1fr}
+}
+@media(max-width:650px){
+ .sidebar{width:72px;padding:12px 7px}
+ .brand{font-size:11px;padding:8px 2px;text-align:center}
+ .brand small,.nav span,.group{display:none}
+ .nav{justify-content:center;padding:14px 4px;font-size:18px}
+ .main{margin-left:72px;width:calc(100% - 72px);padding:16px 11px}
+ .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .card,.box{padding:12px}
+ .value{font-size:19px}
+ h1{font-size:19px}
+ .form{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
+<div class="app">
 
-<header>
- <div class="logo">KHAN <span>AI TRADER</span></div>
- <div class="badge">PAPER TRADING MODE</div>
+<aside class="sidebar">
+ <div class="brand">KHAN AI TRADER<small>SMART TRADING TERMINAL</small></div>
+
+ <div class="group">MAIN MENU</div>
+ <button class="nav active" data-page="dashboard">📊 <span data-i="dashboard">Dashboard</span></button>
+ <button class="nav" data-page="market">📈 <span data-i="market">Live Market</span></button>
+ <button class="nav" data-page="watchlist">⭐ <span data-i="watchlist">Watchlist</span></button>
+ <button class="nav" data-page="options">🔀 <span data-i="options">Options Chain</span></button>
+
+ <div class="group">TRADING</div>
+ <button class="nav" data-page="strategy">🧠 <span data-i="strategy">AI Strategy</span></button>
+ <button class="nav" data-page="algo">⚙️ <span data-i="algo">Algo Trading</span></button>
+ <button class="nav" data-page="positions">💼 <span data-i="positions">Positions</span></button>
+ <button class="nav" data-page="orders">📝 <span data-i="orders">Orders</span></button>
+
+ <div class="group">ANALYTICS</div>
+ <button class="nav" data-page="history">📚 <span data-i="history">Trade History</span></button>
+ <button class="nav" data-page="reports">📉 <span data-i="reports">Reports</span></button>
+ <button class="nav" data-page="risk">🛡️ <span data-i="risk">Risk Manager</span></button>
+
+ <div class="group">SYSTEM</div>
+ <button class="nav" data-page="settings">⚙️ <span data-i="settings">Settings</span></button>
+</aside>
+
+<main class="main">
+<header class="topbar">
+ <div>
+  <h1 id="pageTitle">Dashboard</h1>
+  <div class="subtitle">KHAN AI TRADER · Trading Control Center</div>
+ </div>
+ <div class="actions">
+  <span class="status">● PAPER MODE</span>
+  <select id="language" style="width:125px" onchange="setLanguage(this.value)">
+   <option value="en">English</option>
+   <option value="ur">اردو</option>
+   <option value="mr">मराठी</option>
+   <option value="hi">हिंदी</option>
+  </select>
+ </div>
 </header>
 
-<main>
-<div class="cards">
- <div class="card"><div class="label">NIFTY 50</div><div class="value" id="nifty">24500</div></div>
- <div class="card"><div class="label">BANK NIFTY</div><div class="value" id="bank">55000</div></div>
- <div class="card"><div class="label">پیپر بیلنس</div><div class="value" id="balance">₹5,000</div></div>
- <div class="card"><div class="label">آج کا P/L</div><div class="value" id="todayPnl">₹0</div></div>
-</div>
+<!-- DASHBOARD -->
+<section class="page active" id="dashboard">
+ <div class="grid cards">
+  <div class="card"><div class="label">Available Capital</div><div class="value" id="capital">₹5,000</div><div class="small">Paper trading balance</div></div>
+  <div class="card"><div class="label">Today's P&L</div><div class="value green" id="todayPnl">₹0.00</div><div class="small">Realized + unrealized</div></div>
+  <div class="card"><div class="label">Open Positions</div><div class="value" id="openCount">0</div><div class="small">Currently active</div></div>
+  <div class="card"><div class="label">Total Trades</div><div class="value" id="tradeCount">0</div><div class="small">Saved trade records</div></div>
+ </div>
 
-<div class="cards">
- <div class="card"><div class="label">اوپن پوزیشنز</div><div class="value" id="openCount">0</div></div>
- <div class="card"><div class="label">بند ٹریڈز</div><div class="value" id="closedCount">0</div></div>
- <div class="card"><div class="label">Unrealized P/L</div><div class="value" id="unrealized">₹0</div></div>
- <div class="card"><div class="label">ڈیٹا موڈ</div><div class="value yellow">SIMULATED</div></div>
-</div>
-
-<nav>
- <button class="active" data-tab="watch">واچ لسٹ</button>
- <button data-tab="positions">پوزیشنز</button>
- <button data-tab="history">ہسٹری</button>
- <button data-tab="algo">الگو</button>
- <button data-tab="settings">سیٹنگز</button>
-</nav>
-
-<section id="watch" class="panel active">
- <div class="box">
-  <div class="row"><h2>مارکیٹ واچ</h2><button class="buy" onclick="openTrade()">+ نئی ٹریڈ</button></div>
-  <div class="tablewrap">
-   <table>
-    <thead><tr><th>Symbol</th><th>Price</th><th>Change</th><th>Action</th></tr></thead>
-    <tbody id="watchRows"></tbody>
-   </table>
+ <div class="grid two section">
+  <div class="box">
+   <div class="section-head"><h2>Market Overview</h2><span class="badge warn">SIMULATED DATA</span></div>
+   <div class="table-wrap"><table><thead><tr><th>Instrument</th><th>Price</th><th>Change</th></tr></thead>
+   <tbody id="overview"></tbody></table></div>
+  </div>
+  <div class="box">
+   <div class="section-head"><h2>Trading Status</h2></div>
+   <div class="signal"><div class="label">Trading Engine</div><strong class="gold">PAPER MODE ACTIVE</strong></div>
+   <div class="signal"><div class="label">Broker Connection</div><strong class="red">NOT CONNECTED</strong></div>
+   <div class="signal"><div class="label">AI Signal Engine</div><strong class="green">LOCAL INDICATOR ENGINE</strong></div>
+   <div class="signal"><div class="label">Live Orders</div><strong class="red">DISABLED</strong></div>
   </div>
  </div>
- <div class="notice">یہ ورژن پیپر ٹریڈنگ کے لیے ہے۔ قیمتیں فرضی ہیں، لائیو Angel One مارکیٹ ڈیٹا نہیں۔</div>
-</section>
 
-<section id="positions" class="panel">
- <div class="box">
-  <h2>اوپن پوزیشنز — SL / Target</h2>
-  <div class="tablewrap">
-   <table>
-    <thead><tr><th>Symbol</th><th>Side</th><th>Qty</th><th>Entry</th><th>LTP</th><th>Stop Loss</th><th>Target</th><th>P/L</th><th>Action</th></tr></thead>
-    <tbody id="positionRows"></tbody>
-   </table>
+ <div class="grid two section">
+  <div class="box"><div class="section-head"><h2>Recent Orders</h2><button class="btn graybtn" onclick="showPage('orders')">View All</button></div>
+   <div class="table-wrap"><table><thead><tr><th>Instrument</th><th>Side</th><th>Qty</th><th>Status</th></tr></thead><tbody id="recentOrders"></tbody></table></div>
+  </div>
+  <div class="box"><div class="section-head"><h2>Risk Overview</h2></div>
+   <div class="label">Daily loss limit</div><div class="value" id="riskUsed">₹0 / ₹200</div>
+   <div class="progress"><span id="riskBar" style="width:0%"></span></div>
+   <p class="small">Configured paper-trading risk limit.</p>
   </div>
  </div>
 </section>
 
-<section id="history" class="panel">
+<!-- LIVE MARKET -->
+<section class="page" id="market">
+ <div class="notice">Market prices below are sample prices for interface testing. They are NOT live NSE prices.</div>
+ <div class="box section">
+  <div class="section-head"><h2>Market Watch</h2><button class="btn" onclick="renderMarket()">Refresh Display</button></div>
+  <div class="table-wrap"><table><thead><tr><th>Symbol</th><th>Price</th><th>Change</th><th>Action</th></tr></thead><tbody id="marketRows"></tbody></table></div>
+ </div>
+ <div class="box section">
+  <h2>Price Chart</h2><p class="small">Illustrative chart only — not connected to a market feed.</p>
+  <canvas class="chart" id="chart"></canvas>
+ </div>
+</section>
+
+<!-- WATCHLIST -->
+<section class="page" id="watchlist">
  <div class="box">
-  <div class="row"><h2>ٹریڈ ہسٹری</h2><button onclick="exportCSV()">CSV Export</button></div>
-  <div class="tablewrap">
-   <table>
-    <thead><tr><th>Time</th><th>Symbol</th><th>Side</th><th>Qty</th><th>Entry</th><th>Exit</th><th>P/L</th><th>Reason</th></tr></thead>
-    <tbody id="historyRows"></tbody>
-   </table>
+  <div class="section-head"><h2>My Watchlist</h2></div>
+  <div class="form">
+   <div class="field"><label>Instrument</label><select id="watchSymbol"></select></div>
+   <div class="field" style="align-self:end"><button class="btn" onclick="addWatch()">Add to Watchlist</button></div>
+  </div>
+  <div class="table-wrap section"><table><thead><tr><th>Symbol</th><th>Price</th><th>Action</th></tr></thead><tbody id="watchRows"></tbody></table></div>
+ </div>
+</section>
+
+<!-- OPTIONS -->
+<section class="page" id="options">
+ <div class="notice">Options chain is a sample interface. Live option-chain data requires a supported broker/data API connection.</div>
+ <div class="box section">
+  <div class="section-head"><h2>Options Chain</h2>
+   <select id="optionUnderlying" style="width:150px" onchange="renderOptions()"><option>NIFTY</option><option>BANKNIFTY</option></select>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>CE LTP</th><th>CE Signal</th><th>Strike</th><th>PE Signal</th><th>PE LTP</th></tr></thead><tbody id="optionRows"></tbody></table></div>
+ </div>
+</section>
+
+<!-- STRATEGY -->
+<section class="page" id="strategy">
+ <div class="notice">The local strategy engine uses illustrative candles and indicator calculations. It is not a trained AI model and does not provide guaranteed trading signals.</div>
+ <div class="grid two section">
+  <div class="box">
+   <h2>Strategy Configuration</h2>
+   <div class="form section">
+    <div class="field"><label>Instrument</label><select id="strategySymbol"></select></div>
+    <div class="field"><label>Timeframe</label><select id="timeframe"><option>1 Minute</option><option>3 Minutes</option><option>5 Minutes</option><option>15 Minutes</option></select></div>
+    <div class="field"><label>Fast EMA</label><input id="fastEma" type="number" value="9"></div>
+    <div class="field"><label>Slow EMA</label><input id="slowEma" type="number" value="21"></div>
+    <div class="field"><label>RSI Period</label><input id="rsiPeriod" type="number" value="14"></div>
+    <div class="field"><label>RSI Buy Threshold</label><input id="rsiBuy" type="number" value="55"></div>
+   </div>
+   <button class="btn greenbtn section" onclick="runStrategy()">Run Strategy Analysis</button>
+  </div>
+  <div class="box">
+   <h2>Strategy Result</h2>
+   <div id="strategyResult" class="signal"><span class="small">Run analysis to view a signal.</span></div>
+   <p class="small">Indicators: EMA crossover, RSI and price trend.</p>
   </div>
  </div>
 </section>
 
-<section id="algo" class="panel">
- <div class="box">
-  <div class="row"><h2>الگو سگنلز</h2><button id="algoButton" onclick="toggleAlgo()">الگو بند ہے</button></div>
-  <div class="notice">یہ ڈیمو سگنل انجن ہے۔ حقیقی AI سگنلز یا خودکار Angel One آرڈرز اس میں فعال نہیں ہیں۔</div>
-  <div id="signals">الگو بند ہے۔</div>
+<!-- ALGO -->
+<section class="page" id="algo">
+ <div class="grid two">
+  <div class="box">
+   <h2>Algo Trading Control</h2>
+   <div class="notice section">Paper execution only. This control cannot place real broker orders.</div>
+   <div class="switch"><span>Paper Algo Engine</span><input id="algoToggle" type="checkbox" style="width:20px" onchange="toggleAlgo()"></div>
+   <div class="field section"><label>Strategy</label><select id="algoStrategy"><option>EMA + RSI Trend</option><option>Breakout Strategy</option><option>VWAP Reversal</option></select></div>
+   <div class="field section"><label>Trading Instrument</label><select id="algoSymbol"></select></div>
+   <div class="field section"><label>Order Quantity</label><input id="algoQty" type="number" min="1" value="1"></div>
+   <button class="btn greenbtn section" onclick="runAlgo()">Run Paper Signal</button>
+  </div>
+  <div class="box">
+   <h2>Engine Monitor</h2>
+   <div class="signal"><div class="label">Engine Status</div><strong id="algoStatus" class="red">STOPPED</strong></div>
+   <div class="signal"><div class="label">Execution Mode</div><strong class="gold">SIMULATION ONLY</strong></div>
+   <div class="signal"><div class="label">Active Strategy</div><strong id="activeStrategy">EMA + RSI Trend</strong></div>
+   <div class="signal"><div class="label">Last Signal</div><strong id="lastSignal">No signal</strong></div>
+  </div>
  </div>
 </section>
 
-<section id="settings" class="panel">
+<!-- POSITIONS -->
+<section class="page" id="positions">
+ <div class="box">
+  <div class="section-head"><h2>Open Positions</h2><span class="badge warn">PAPER</span></div>
+  <div class="table-wrap"><table><thead><tr><th>Symbol</th><th>Side</th><th>Qty</th><th>Entry</th><th>LTP</th><th>P&L</th><th>SL</th><th>Target</th><th>Exit</th></tr></thead><tbody id="positionRows"></tbody></table></div>
+ </div>
+ <div class="box section">
+  <h2>Place Paper Order</h2>
+  <div class="form section">
+   <div class="field"><label>Instrument</label><select id="orderSymbol"></select></div>
+   <div class="field"><label>Side</label><select id="orderSide"><option>BUY</option><option>SELL</option></select></div>
+   <div class="field"><label>Quantity</label><input type="number" id="orderQty" value="1" min="1"></div>
+   <div class="field"><label>Stop Loss Price</label><input type="number" id="orderSL" placeholder="Optional"></div>
+   <div class="field"><label>Target Price</label><input type="number" id="orderTarget" placeholder="Optional"></div>
+   <div class="field"><label>Order Type</label><select id="orderType"><option>MARKET (SIMULATED)</option></select></div>
+  </div>
+  <button class="btn greenbtn section" onclick="placeOrder()">Place Paper Order</button>
+ </div>
+</section>
+
+<!-- ORDERS -->
+<section class="page" id="orders">
+ <div class="box">
+  <div class="section-head"><h2>Order Book</h2><button class="btn graybtn" onclick="exportCSV()">Export CSV</button></div>
+  <div class="table-wrap"><table><thead><tr><th>Time</th><th>Symbol</th><th>Side</th><th>Qty</th><th>Price</th><th>Status</th></tr></thead><tbody id="orderRows"></tbody></table></div>
+ </div>
+</section>
+
+<!-- HISTORY -->
+<section class="page" id="history">
+ <div class="box">
+  <div class="section-head"><h2>Trade History</h2><button class="btn graybtn" onclick="exportCSV()">Export CSV</button></div>
+  <div class="table-wrap"><table><thead><tr><th>Date</th><th>Symbol</th><th>Side</th><th>Qty</th><th>Entry</th><th>Exit</th><th>P&L</th></tr></thead><tbody id="historyRows"></tbody></table></div>
+ </div>
+</section>
+
+<!-- REPORTS -->
+<section class="page" id="reports">
+ <div class="grid cards">
+  <div class="card"><div class="label">Winning Trades</div><div class="value green" id="wins">0</div></div>
+  <div class="card"><div class="label">Losing Trades</div><div class="value red" id="losses">0</div></div>
+  <div class="card"><div class="label">Win Rate</div><div class="value" id="winRate">0%</div></div>
+  <div class="card"><div class="label">Net Realized P&L</div><div class="value" id="netPnl">₹0</div></div>
+ </div>
+ <div class="box section"><h2>Performance Summary</h2><div id="reportSummary" class="signal"></div></div>
+</section>
+
+<!-- RISK -->
+<section class="page" id="risk">
  <div class="box">
   <h2>Risk Management</h2>
-  <div class="grid">
-   <div class="field"><label>Daily Loss Limit ₹</label><input id="dailyLimit" type="number"></div>
-   <div class="field"><label>Per Trade Risk ₹</label><input id="riskLimit" type="number"></div>
+  <div class="form section">
+   <div class="field"><label>Starting Capital (₹)</label><input id="riskCapital" type="number" value="5000"></div>
+   <div class="field"><label>Risk Per Trade (₹)</label><input id="riskPerTrade" type="number" value="100"></div>
+   <div class="field"><label>Daily Loss Limit (₹)</label><input id="dailyLimit" type="number" value="200"></div>
+   <div class="field"><label>Maximum Open Positions</label><input id="maxPositions" type="number" value="1"></div>
   </div>
-  <button class="buy" onclick="saveSettings()">Save Settings</button>
-  <button class="sell" onclick="resetAll()">Reset All Data</button>
+  <button class="btn section" onclick="saveRisk()">Save Risk Settings</button>
+  <div class="signal section"><div class="label">Risk Rule</div><strong>New paper orders are blocked when the daily loss limit or position limit is reached.</strong></div>
  </div>
 </section>
-</main>
 
-<div class="modal" id="tradeModal">
- <div class="dialog">
-  <div class="row"><h2>نئی پیپر ٹریڈ</h2><button onclick="closeTrade()">✕</button></div>
-  <div class="field"><label>Symbol</label><select id="symbol"></select></div>
-  <div class="field"><label>Side</label><select id="side"><option value="BUY">BUY</option><option value="SELL">SELL</option></select></div>
-  <div class="grid">
-   <div class="field"><label>Quantity</label><input id="qty" type="number" min="1" value="1"></div>
-   <div class="field"><label>Entry Price</label><input id="entry" type="number" step=".05"></div>
-   <div class="field"><label>Stop Loss</label><input id="sl" type="number" step=".05"></div>
-   <div class="field"><label>Target</label><input id="target" type="number" step=".05"></div>
+<!-- SETTINGS -->
+<section class="page" id="settings">
+ <div class="grid two">
+  <div class="box">
+   <h2>App Settings</h2>
+   <div class="field section"><label>Interface Language</label>
+    <select onchange="setLanguage(this.value)" id="settingsLanguage">
+     <option value="en">English</option><option value="ur">اردو</option>
+     <option value="mr">मराठी</option><option value="hi">हिंदी</option>
+    </select>
+   </div>
+   <div class="switch"><span>Default opening language: English</span><span class="badge good">ACTIVE</span></div>
+   <div class="switch"><span>Paper Trading</span><span class="badge good">ENABLED</span></div>
+   <div class="switch"><span>Live Trading</span><span class="badge bad">DISABLED</span></div>
   </div>
-  <div class="notice" id="riskPreview"></div>
-  <button class="buy" style="width:100%" onclick="placeTrade()">BUY / SELL ORDER</button>
+  <div class="box">
+   <h2>Angel One Integration</h2>
+   <div class="signal"><div class="label">Broker</div><strong>Angel One SmartAPI</strong></div>
+   <div class="signal"><div class="label">API Status</div><strong class="red">NOT CONNECTED</strong></div>
+   <div class="signal"><div class="label">Backend Server</div><strong class="red">NOT CONFIGURED</strong></div>
+   <p class="small">API credentials must be securely handled by a backend server, never embedded in this HTML file.</p>
+  </div>
  </div>
-</div>
+ <div class="box section">
+  <h2>Data Management</h2>
+  <p class="small">Your browser stores paper trades locally. Clearing browser data may erase them.</p>
+  <div class="actions section">
+   <button class="btn graybtn" onclick="exportBackup()">Download Backup</button>
+   <button class="btn redbtn" onclick="resetApp()">Reset Paper Account</button>
+  </div>
+ </div>
+</section>
 
-<div class="modal" id="editModal">
- <div class="dialog">
-  <div class="row"><h2>SL / Target تبدیل کریں</h2><button onclick="closeEdit()">✕</button></div>
-  <input type="hidden" id="editId">
-  <div class="field"><label>Stop Loss</label><input id="editSL" type="number" step=".05"></div>
-  <div class="field"><label>Target</label><input id="editTarget" type="number" step=".05"></div>
-  <button class="buy" style="width:100%" onclick="saveEdit()">Save Changes</button>
- </div>
+</main>
 </div>
 
 <script>
-const STORAGE_KEY="KHAN_AI_TRADER_DATA_V8";
-
-const assets=[
- ["NIFTY",24500],
- ["BANKNIFTY",55000],
- ["RELIANCE",1450],
- ["HDFCBANK",1750],
- ["ICICIBANK",1320],
- ["TCS",3200],
- ["INFY",1550],
- ["SBIN",850]
-];
-
-function freshState(){
- return {
-  balance:5000,
-  initialCapital:5000,
-  dailyLimit:200,
-  riskLimit:100,
-  positions:[],
-  history:[]
- };
-}
-
-function loadState(){
- try{
-  const saved=JSON.parse(localStorage.getItem(STORAGE_KEY));
-  if(saved && Array.isArray(saved.positions) && Array.isArray(saved.history)){
-   return {...freshState(),...saved};
-  }
- }catch(e){}
- return freshState();
-}
-
-let state=loadState();
-let prices={};
-let changes={};
-let algoEnabled=false;
-
-assets.forEach(([s,p])=>{
- prices[s]=p;
- changes[s]=0;
-});
-
 const $=id=>document.getElementById(id);
-const money=n=>"₹"+Number(n||0).toLocaleString("en-IN",{maximumFractionDigits:2});
-const time=()=>new Date().toLocaleString("en-IN");
-
-function save(){
- localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
- render();
-}
-
-function unrealized(p){
- const price=prices[p.symbol]||p.entry;
- return (p.side==="BUY"?price-p.entry:p.entry-price)*p.qty;
-}
-
-function todayProfit(){
- const today=new Date().toDateString();
- const realized=state.history
-  .filter(t=>new Date(t.closedAt).toDateString()===today)
-  .reduce((sum,t)=>sum+t.pnl,0);
- const open=state.positions.reduce((sum,p)=>sum+unrealized(p),0);
- return realized+open;
-}
-
-function render(){
- $("balance").textContent=money(state.balance);
- $("openCount").textContent=state.positions.length;
- $("closedCount").textContent=state.history.length;
-
- const daily=todayProfit();
- $("todayPnl").textContent=money(daily);
- $("todayPnl").className="value "+(daily>=0?"green":"red");
-
- const unreal=state.positions.reduce((s,p)=>s+unrealized(p),0);
- $("unrealized").textContent=money(unreal);
- $("unrealized").className="value "+(unreal>=0?"green":"red");
-
- $("nifty").textContent=money(prices.NIFTY);
- $("bank").textContent=money(prices.BANKNIFTY);
-
- $("watchRows").innerHTML=assets.map(([symbol])=>`
-  <tr>
-   <td><b>${symbol}</b></td>
-   <td>${money(prices[symbol])}</td>
-   <td class="${changes[symbol]>=0?"green":"red"}">${changes[symbol].toFixed(2)}%</td>
-   <td>
-    <button class="small buy" onclick="openTrade('${symbol}','BUY')">BUY</button>
-    <button class="small sell" onclick="openTrade('${symbol}','SELL')">SELL</button>
-   </td>
-  </tr>
- `).join("");
-
- $("positionRows").innerHTML=state.positions.length?
- state.positions.map(p=>`
-  <tr>
-   <td>${p.symbol}</td>
-   <td>${p.side}</td>
-   <td>${p.qty}</td>
-   <td>${money(p.entry)}</td>
-   <td>${money(prices[p.symbol])}</td>
-   <td class="red">${money(p.sl)}</td>
-   <td class="green">${money(p.target)}</td>
-   <td class="${unrealized(p)>=0?"green":"red"}">${money(unrealized(p))}</td>
-   <td>
-    <button class="small" onclick="editPosition('${p.id}')">SL/TP</button>
-    <button class="small sell" onclick="closePosition('${p.id}','Manual Exit')">Exit</button>
-   </td>
-  </tr>
- `).join("")
- :'<tr><td colspan="9">کوئی اوپن پوزیشن نہیں۔</td></tr>';
-
- $("historyRows").innerHTML=state.history.length?
- state.history.slice().reverse().map(t=>`
-  <tr>
-   <td>${t.closedAt}</td><td>${t.symbol}</td><td>${t.side}</td>
-   <td>${t.qty}</td><td>${money(t.entry)}</td><td>${money(t.exit)}</td>
-   <td class="${t.pnl>=0?"green":"red"}">${money(t.pnl)}</td><td>${t.reason}</td>
-  </tr>
- `).join("")
- :'<tr><td colspan="8">ٹریڈ ہسٹری خالی ہے۔</td></tr>';
-
- $("dailyLimit").value=state.dailyLimit;
- $("riskLimit").value=state.riskLimit;
-}
-
-function openTrade(symbol,side){
- $("symbol").innerHTML=assets.map(([s])=>`<option value="${s}">${s}</option>`).join("");
- if(symbol)$("symbol").value=symbol;
- $("side").value=side||"BUY";
- setDefaults();
- $("tradeModal").classList.add("show");
-}
-
-function closeTrade(){
- $("tradeModal").classList.remove("show");
-}
-
-function setDefaults(){
- const p=prices[$("symbol").value];
- $("entry").value=p.toFixed(2);
- $("sl").value=(p*.99).toFixed(2);
- $("target").value=(p*1.02).toFixed(2);
- previewRisk();
-}
-
-$("symbol").addEventListener("change",setDefaults);
-
-["qty","entry","sl","target"].forEach(id=>{
- $(id).addEventListener("input",previewRisk);
-});
-
-function previewRisk(){
- const q=+$("qty").value||0;
- const e=+$("entry").value||0;
- const s=+$("sl").value||0;
- const t=+$("target").value||0;
- $("riskPreview").textContent=
- "ممکنہ نقصان: "+money(Math.abs(e-s)*q)+
- " | ممکنہ ہدف: "+money(Math.abs(t-e)*q);
-}
-
-function placeTrade(){
- const symbol=$("symbol").value;
- const side=$("side").value;
- const qty=Math.floor(+$("qty").value);
- const entry=+$("entry").value;
- const sl=+$("sl").value;
- const target=+$("target").value;
-
- if(!qty||qty<1||entry<=0||sl<=0||target<=0){
-  alert("درست Quantity، Entry، SL اور Target درج کریں۔");
-  return;
- }
-
- const risk=Math.abs(entry-sl)*qty;
-
- if(risk>state.riskLimit){
-  alert("فی ٹریڈ رسک کی حد سے زیادہ ہے۔ Risk Settings تبدیل کریں۔");
-  return;
- }
-
- if(todayProfit()<=-state.dailyLimit){
-  alert("روزانہ نقصان کی حد پوری ہو چکی ہے۔");
-  return;
- }
-
- let reserve=entry*qty;
-
- if(side==="BUY" && reserve>state.balance){
-  alert("پیپر بیلنس ناکافی ہے۔");
-  return;
- }
-
- if(side==="BUY"){
-  state.balance-=reserve;
- }else{
-  reserve=Math.min(state.balance,entry*qty*.1);
-  state.balance-=reserve;
- }
-
- state.positions.push({
-  id:Date.now().toString(36)+Math.random().toString(36).slice(2),
-  symbol,side,qty,entry,sl,target,reserve,
-  openedAt:time()
- });
-
- closeTrade();
- save();
-}
-
-function closePosition(id,reason){
- const index=state.positions.findIndex(p=>p.id===id);
- if(index<0)return;
-
- const p=state.positions[index];
- const exit=prices[p.symbol];
- const pnl=unrealized(p);
-
- if(p.side==="BUY"){
-  state.balance+=exit*p.qty;
- }else{
-  state.balance+=p.reserve+pnl;
- }
-
- state.history.push({
-  ...p,
-  exit,
-  pnl,
-  reason,
-  closedAt:time()
- });
-
- state.positions.splice(index,1);
- save();
-}
-
-function editPosition(id){
- const p=state.positions.find(x=>x.id===id);
- if(!p)return;
-
- $("editId").value=id;
- $("editSL").value=p.sl;
- $("editTarget").value=p.target;
- $("editModal").classList.add("show");
-}
-
-function closeEdit(){
- $("editModal").classList.remove("show");
-}
-
-function saveEdit(){
- const p=state.positions.find(x=>x.id===$("editId").value);
- if(!p)return;
-
- const sl=+$("editSL").value;
- const target=+$("editTarget").value;
-
- if(sl<=0||target<=0){
-  alert("درست قیمت درج کریں۔");
-  return;
- }
-
- p.sl=sl;
- p.target=target;
- closeEdit();
- save();
-}
-
-function priceUpdate(){
- assets.forEach(([symbol,base])=>{
-  const old=prices[symbol];
-  const movement=(Math.random()-.5)*base*.001;
-  prices[symbol]=Math.max(.05,old+movement);
-  changes[symbol]=(prices[symbol]/base-1)*100;
- });
-
- const triggered=[];
-
- state.positions.forEach(p=>{
-  const price=prices[p.symbol];
-  const hitSL=p.side==="BUY"?price<=p.sl:price>=p.sl;
-  const hitTarget=p.side==="BUY"?price>=p.target:price<=p.target;
-
-  if(hitSL)triggered.push([p.id,"Stop Loss"]);
-  else if(hitTarget)triggered.push([p.id,"Target"]);
- });
-
- triggered.forEach(([id,reason])=>closePosition(id,reason));
- render();
-
- if(algoEnabled){
-  const c=changes.NIFTY;
-  $("signals").innerHTML=
-   `<div class="box"><b class="${c>0.01?"green":c<-.01?"red":"yellow"}">
-   NIFTY: ${c>0.01?"BUY":c<-.01?"SELL":"WAIT"}</b>
-   <p>فرضی قیمت کی تبدیلی: ${c.toFixed(3)}%</p>${time()}</div>`;
- }
-}
-
-function toggleAlgo(){
- algoEnabled=!algoEnabled;
- $("algoButton").textContent=algoEnabled?"الگو فعال ہے":"الگو بند ہے";
- if(!algoEnabled)$("signals").textContent="الگو بند ہے۔";
-}
-
-function saveSettings(){
- state.dailyLimit=Math.max(1,+$("dailyLimit").value||200);
- state.riskLimit=Math.max(1,+$("riskLimit").value||100);
- save();
- alert("سیٹنگز محفوظ ہوگئیں۔");
-}
-
-function resetAll(){
- if(!confirm("کیا تمام پوزیشنز اور ہسٹری ختم کرکے ری سیٹ کرنا چاہتے ہیں؟"))return;
- state=freshState();
- localStorage.removeItem(STORAGE_KEY);
- save();
-}
-
-function exportCSV(){
- const rows=[
-  ["Time","Symbol","Side","Quantity","Entry","Exit","PnL","Reason"],
-  ...state.history.map(t=>[t.closedAt,t.symbol,t.side,t.qty,t.entry,t.exit,t.pnl,t.reason])
- ];
- const csv="\uFEFF"+rows.map(r=>r.map(v=>'"'+String(v??"").replaceAll('"','""')+'"').join(",")).join("\n");
- const a=document.createElement("a");
- a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
- a.download="KHAN_AI_TRADER_HISTORY.csv";
- a.click();
- URL.revokeObjectURL(a.href);
-}
-
-document.querySelectorAll("[data-tab]").forEach(button=>{
- button.addEventListener("click",()=>{
-  document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===button.dataset.tab));
-  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.id===button.dataset.tab));
- });
-});
-
-render();
-setInterval(priceUpdate,2000);
-</script>
-</body>
-</html>
+const symbols={
+ NIFTY:{price:24500,change:0.42},
+ BANKNIFTY:{price:52300,change:-0.25},
+ RELIANCE:{price:1450,change:0.68},
+ TCS:{price:3200,change:0.31},
+ INFY:{price:1550,change:-0.42},
+ SBIN:{price:780,change:0.57},
+ HDFCBANK:{price:1680,change:-0.18},
+ ITC:{price:410,change:0.24}
+};
+const translations={
+ en:{dashboard:"Dashboard",market:"Live Market",watchlist:"Watchlist",options:"Options Chain",strategy:"AI Strategy",algo:"Algo Trading",positions:"Positions",orders:"Orders",history:"Trade History",reports:"Reports",risk:"Risk Manager",settings:"Settings"},
+ hi:{dashboard:"डैशबोर्ड",market:"लाइव मार्केट",watchlist:"वॉचलिस्ट",options:"ऑप्शन चेन",strategy:"AI रणनीति",algo:"एल्गो ट्रेडिंग",positions:"पोजीशन",orders:"ऑर्डर",history:"ट्रेड हिस्ट्री",reports:"रिपोर्ट",risk:"रिस्क मैनेजर",settings:"सेटिंग्स"},
+ mr:{dashboard:"डॅशबोर्ड",market:"लाइव्ह मार्केट",watchlist:"वॉचलिस्ट",options:"ऑप्शन चेन",strategy:"AI रणनीती",algo:"अल्गो ट्रेडिंग",positions:"पोझिशन्स",orders:"ऑर्डर्स",history:"ट्रेड इतिहास",reports:"अहवाल",risk:"जोखीम व्यवस्थापन",settings:"सेटिंग्ज"},
+ ur:{dashboard:"ڈیش بورڈ",market:"لائیو مارکیٹ"
