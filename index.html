@@ -1,387 +1,1140 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KHAN AI TRADER - Pro Terminal</title>
-    <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { margin: 0; padding: 0; background-color: #0B0E14; color: #EAECEF; user-select: none; }
-        .app { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; height: 100vh; background: #12161F; position: relative; }
-        
-        .header-top { background: #181D27; padding: 10px 14px; border-bottom: 1px solid #262D3D; display: flex; align-items: center; gap: 10px; }
-        .search-box { flex: 1; background: #12161F; border: 1px solid #2B3139; border-radius: 8px; display: flex; align-items: center; padding: 8px 12px; }
-        .search-box input { background: transparent; border: none; color: #FFF; font-size: 13px; width: 100%; outline: none; }
-        .cap-badge { background: #0ECB8120; color: #0ECB81; border: 1px solid #0ECB8150; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; }
-
-        .cat-scroll { display: flex; background: #181D27; overflow-x: auto; padding: 0 10px 8px 10px; gap: 16px; border-bottom: 1px solid #262D3D; white-space: nowrap; scrollbar-width: none; }
-        .cat-scroll::-webkit-scrollbar { display: none; }
-        .cat-item { font-size: 13px; font-weight: 600; color: #848E9C; cursor: pointer; padding-bottom: 4px; }
-        .cat-item.active { color: #3861FB; border-bottom: 2px solid #3861FB; }
-
-        .main { flex: 1; overflow-y: auto; padding-bottom: 80px; background: #12161F; }
-        .section-title { padding: 14px 14px 6px 14px; font-size: 13px; font-weight: 700; color: #848E9C; display: flex; justify-content: space-between; align-items: center; }
-        
-        .stock-row { padding: 12px 14px; border-bottom: 1px solid #1E232F; display: flex; justify-content: space-between; align-items: center; background: #12161F; }
-        .s-name { font-size: 14px; font-weight: 700; }
-        .s-sub { font-size: 11px; color: #848E9C; margin-top: 2px; }
-        .s-price-col { text-align: right; }
-        .s-ltp { font-size: 14px; font-weight: 700; }
-        .s-chg { font-size: 11px; margin-top: 2px; }
-
-        .tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; }
-        .tool-card { background: #181D27; border: 1px solid #262D3D; padding: 12px 8px; border-radius: 8px; text-align: center; cursor: pointer; }
-        .tool-icon { font-size: 18px; margin-bottom: 4px; }
-        .tool-label { font-size: 11px; font-weight: 600; color: #C9D1D9; }
-
-        .btn { border: none; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; color: #FFF; }
-        .btn-blue { background: #3861FB; }
-        .btn-green { background: #0ECB81; color: #000; }
-        .btn-red { background: #F6465D; }
-        .btn-gray { background: #2B3139; color: #EAECEF; }
-
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #181D27; border-top: 1px solid #262D3D; display: flex; z-index: 50; }
-        .nav-item { flex: 1; padding: 8px 0; text-align: center; color: #848E9C; font-size: 10px; font-weight: 600; cursor: pointer; }
-        .nav-item.active { color: #3861FB; background: #151A24; }
-        .nav-icon { font-size: 18px; display: block; margin-bottom: 2px; }
-
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; justify-content: flex-end; flex-direction: column; }
-        .modal-box { background: #181D27; padding: 20px; border-top-left-radius: 16px; border-top-right-radius: 16px; border-top: 1px solid #2B3139; max-width: 480px; width: 100%; margin: 0 auto; }
-        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 13px; color: #848E9C; }
-        .inp { background: #12161F; border: 1px solid #2B3139; color: #FFF; padding: 8px 12px; border-radius: 6px; width: 130px; text-align: right; font-size: 14px; font-weight: 700; outline: none; }
-    </style>
-</head>
-<body>
-
-<div class="app">
-    <div class="header-top">
-        <div class="search-box">
-            <span style="margin-right:8px; color:#848E9C;">🔍</span>
-            <input type="text" id="globalSearch" placeholder="Search Stocks, F&O..." oninput="handleSearch(this.value)">
-        </div>
-        <div class="cap-badge" onclick="switchNav('account')">₹<span id="topCap">5,000</span></div>
-    </div>
-
-    <div class="cat-scroll">
-        <div class="cat-item active" onclick="switchNav('home')">Stocks</div>
-        <div class="cat-item" onclick="switchNav('options')">F&O Chain</div>
-        <div class="cat-item" onclick="switchNav('portfolio')">Holdings</div>
-    </div>
-
-    <div class="main" id="mainScreen"></div>
-
-    <div class="bottom-nav">
-        <div class="nav-item active" id="nav-home" onclick="switchNav('home')"><span class="nav-icon">🏠</span>HOME</div>
-        <div class="nav-item" id="nav-watchlist" onclick="switchNav('watchlist')"><span class="nav-icon">⭐</span>WATCHLIST</div>
-        <div class="nav-item" id="nav-portfolio" onclick="switchNav('portfolio')"><span class="nav-icon">💼</span>PORTFOLIO</div>
-        <div class="nav-item" id="nav-orders" onclick="switchNav('orders')"><span class="nav-icon">📋</span>ORDERS</div>
-        <div class="nav-item" id="nav-account" onclick="switchNav('account')"><span class="nav-icon">👤</span>ACCOUNT</div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="tradeModal">
-    <div class="modal-box">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #262D3D; padding-bottom:10px; margin-bottom:14px;">
-            <div>
-                <strong id="mSym" style="font-size:16px;">SYMBOL</strong>
-                <div id="mPrice" style="font-size:12px; color:#0ECB81; margin-top:2px;">LTP: ₹0</div>
-            </div>
-            <button class="btn btn-gray" onclick="closeModal()">✕</button>
-        </div>
-
-        <div class="input-row">
-            <span>Quantity</span>
-            <input type="number" id="mQty" class="inp" value="1" oninput="calcCost()">
-        </div>
-        <div class="input-row">
-            <span>Profit Target (₹)</span>
-            <input type="number" id="mTarget" class="inp" style="color:#0ECB81;" step="0.5">
-        </div>
-        <div class="input-row">
-            <span>Stop Loss (₹)</span>
-            <input type="number" id="mSL" class="inp" style="color:#F6465D;" step="0.5">
-        </div>
-
-        <div style="background:#12161F; padding:10px; border-radius:6px; font-size:12px; margin-bottom:14px; display:flex; justify-content:space-between;">
-            <span style="color:#848E9C;">Total Cost: <strong id="mCost" style="color:#FFF;">₹0</strong></span>
-            <span style="color:#848E9C;">Balance: <strong style="color:#0ECB81;">₹<span id="mCapDisplay">5000</span></strong></span>
-        </div>
-
-        <div style="display:flex; gap:8px; margin-bottom:8px;">
-            <button class="btn btn-green" style="flex:1; padding:12px;" onclick="executeTrade('BUY')">PAPER BUY</button>
-            <button class="btn btn-red" style="flex:1; padding:12px;" onclick="executeTrade('SELL')">PAPER SELL</button>
-        </div>
-        <button class="btn btn-blue" style="width:100%; padding:12px;" onclick="toggleStockAlgo()">🤖 START / STOP AI ALGO BOT</button>
-    </div>
-</div>
-
-<script>
-    let db = JSON.parse(localStorage.getItem('khan_full_terminal_v10')) || {
-        capital: 5000,
-        dailyPnl: 0,
-        positions: [],
-        orders: [],
-        history: [],
-        algos: []
-    };
-
-    let currentNav = 'home';
-    let searchQuery = '';
-    let selectedAsset = null;
-
-    let stocks = [
-        { sym: 'HORIZONIND', exch: 'NSE', p: 47.20, chg: '+1.70%', tag: 'interested' },
-        { sym: 'KARURVYSYA', exch: 'NSE', p: 381.55, chg: '+0.25%', tag: 'interested' },
-        { sym: 'SYLPH', exch: 'BSE', p: 0.22, chg: '0.00%', tag: 'interested' },
-        { sym: 'GVT&D', exch: 'NSE', p: 4420.00, chg: '+5.24%', tag: 'mover' },
-        { sym: 'POLICYBZR', exch: 'NSE', p: 1105.00, chg: '+5.23%', tag: 'mover' },
-        { sym: 'MCX', exch: 'NSE', p: 3720.00, chg: '+2.63%', tag: 'mover' },
-        { sym: 'RELIANCE', exch: 'NSE', p: 2985.50, chg: '+1.08%', tag: 'watch' },
-        { sym: 'TCS', exch: 'NSE', p: 3920.00, chg: '-0.32%', tag: 'watch' },
-        { sym: 'SUZLON', exch: 'NSE', p: 46.50, chg: '+2.10%', tag: 'watch' },
-        { sym: 'ZOMATO', exch: 'NSE', p: 185.30, chg: '+1.40%', tag: 'watch' }
-    ];
-
-    function persist() {
-        localStorage.setItem('khan_full_terminal_v10', JSON.stringify(db));
-        document.getElementById('topCap').innerText = db.capital.toLocaleString('en-IN');
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>React Artifact</title>
+  <script>(function installDevicePermissionRuntime() {
+  if (window.parent === window)
+    return;
+  let parentOrigin;
+  try {
+    const embeddingOrigin = window.location.ancestorOrigins?.[0] || document.referrer, { hostname, origin, port, protocol } = new URL(embeddingOrigin), supportedHost = hostname === "meta.ai" || hostname === "ecto1.ai" || [".meta.ai", ".ecto1.ai", ".internalfb.com", ".hatch.club"].some((suffix) => hostname.endsWith(suffix));
+    if (hostname === "localhost" && (protocol === "http:" || protocol === "https:") || protocol === "https:" && port === "" && supportedHost)
+      parentOrigin = origin;
+  } catch {
+    return;
+  }
+  if (!parentOrigin)
+    return;
+  function request(capability) {
+    try {
+      const policy = document.permissionsPolicy || document.featurePolicy;
+      if (navigator.userActivation?.isActive === !0 && policy?.allowsFeature(capability) === !1)
+        window.parent.postMessage({ type: "ecto:artifact-device-permission-request", version: 1, capability }, parentOrigin);
+    } catch {}
+  }
+  function hasAudio(constraints) {
+    for (let value = constraints;value != null; value = Object.getPrototypeOf(value)) {
+      const descriptor = Object.getOwnPropertyDescriptor(value, "audio");
+      if (descriptor)
+        return Boolean(descriptor.value);
     }
+    return !1;
+  }
+  function wrap(receiver, name, capability, enabled) {
+    try {
+      if ((document.permissionsPolicy || document.featurePolicy)?.allowsFeature(capability) !== !1)
+        return;
+      const native = receiver?.[name];
+      if (typeof native !== "function")
+        return;
+      receiver[name] = function() {
+        try {
+          if (this === receiver && enabled(arguments))
+            request(capability);
+        } catch {}
+        return Reflect.apply(native, this, arguments);
+      };
+    } catch {}
+  }
+  wrap(navigator.mediaDevices, "getUserMedia", "microphone", (args) => hasAudio(args[0]));
+  const hasPositionCallback = (args) => typeof args[0] === "function";
+  wrap(navigator.geolocation, "getCurrentPosition", "geolocation", hasPositionCallback);
+  wrap(navigator.geolocation, "watchPosition", "geolocation", hasPositionCallback);
+})();</script>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500;700&display=swap');
 
-    setInterval(() => {
-        stocks.forEach(s => {
-            s.p = +(s.p * (1 + (Math.random() - 0.49) * 0.002)).toFixed(2);
-            let pEl = document.getElementById('price-' + s.sym);
-            if (pEl) pEl.innerText = '₹ ' + s.p.toLocaleString('en-IN');
-        });
+*, ::before, ::after{
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+  --tw-contain-size:  ;
+  --tw-contain-layout:  ;
+  --tw-contain-paint:  ;
+  --tw-contain-style:  ;
+}
 
-        for (let i = db.positions.length - 1; i >= 0; i--) {
-            let p = db.positions[i];
-            let found = stocks.find(x => x.sym === p.sym);
-            p.ltp = found ? found.p : Math.max(2, +(p.ltp + (Math.random() - 0.48) * 1.5).toFixed(2));
-            p.highPrice = Math.max(p.highPrice || p.avg, p.ltp);
+::backdrop{
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+  --tw-contain-size:  ;
+  --tw-contain-layout:  ;
+  --tw-contain-paint:  ;
+  --tw-contain-style:  ;
+}
 
-            let currentPnl = p.side === 'BUY' ? (p.ltp - p.avg) * p.qty : (p.avg - p.ltp) * p.qty;
+/*
+! tailwindcss v3.4.18 | MIT License | https://tailwindcss.com
+*/
 
-            let pnlEl = document.getElementById('pos-pnl-' + i);
-            let ltpEl = document.getElementById('pos-ltp-' + i);
-            if (pnlEl) {
-                pnlEl.innerText = (currentPnl >= 0 ? '+' : '') + '₹' + currentPnl.toFixed(2);
-                pnlEl.className = 's-ltp ' + (currentPnl >= 0 ? 'up' : 'down');
-            }
-            if (ltpEl) ltpEl.innerText = '₹' + p.ltp;
+/*
+1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
+2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
+*/
 
-            if (currentPnl > 20 && p.ltp > (p.avg + 2)) {
-                let newTrail = +(p.ltp - 2).toFixed(2);
-                if (newTrail > p.sl) p.sl = newTrail;
-            }
+*,
+::before,
+::after {
+  box-sizing: border-box;
+  /* 1 */
+  border-width: 0;
+  /* 2 */
+  border-style: solid;
+  /* 2 */
+  border-color: #e5e7eb;
+  /* 2 */
+}
 
-            if (p.side === 'BUY') {
-                if (p.ltp >= p.target) closePosition(i, 'PROFIT TARGET HIT 🎯');
-                else if (p.ltp <= p.sl) closePosition(i, 'STOP LOSS HIT 🛑');
-            } else {
-                if (p.ltp <= p.target) closePosition(i, 'PROFIT TARGET HIT 🎯');
-                else if (p.ltp >= p.sl) closePosition(i, 'STOP LOSS HIT 🛑');
-            }
-        }
-    }, 1500);
+::before,
+::after {
+  --tw-content: '';
+}
 
-    function switchNav(nav) {
-        currentNav = nav;
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        let el = document.getElementById('nav-' + nav);
-        if (el) el.classList.add('active');
-        renderMain();
-    }
+/*
+1. Use a consistent sensible line-height in all browsers.
+2. Prevent adjustments of font size after orientation changes in iOS.
+3. Use a more readable tab size.
+4. Use the user's configured `sans` font-family by default.
+5. Use the user's configured `sans` font-feature-settings by default.
+6. Use the user's configured `sans` font-variation-settings by default.
+7. Disable tap highlights on iOS
+*/
 
-    function handleSearch(val) {
-        searchQuery = val;
-        if (currentNav !== 'watchlist' && currentNav !== 'home') switchNav('watchlist');
-        else renderMain();
-    }
+html,
+:host {
+  line-height: 1.5;
+  /* 1 */
+  -webkit-text-size-adjust: 100%;
+  /* 2 */
+  -moz-tab-size: 4;
+  /* 3 */
+  -o-tab-size: 4;
+     tab-size: 4;
+  /* 3 */
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  /* 4 */
+  font-feature-settings: normal;
+  /* 5 */
+  font-variation-settings: normal;
+  /* 6 */
+  -webkit-tap-highlight-color: transparent;
+  /* 7 */
+}
 
-    function openModal(sym, price) {
-        selectedAsset = { sym, price };
-        document.getElementById('mSym').innerText = sym;
-        document.getElementById('mPrice').innerText = 'LTP: ₹ ' + price.toFixed(2);
-        document.getElementById('mCapDisplay').innerText = db.capital.toLocaleString('en-IN');
-        document.getElementById('mQty').value = Math.max(1, Math.ceil(500 / price));
-        document.getElementById('mTarget').value = +(price * 1.04).toFixed(2);
-        document.getElementById('mSL').value = +(price * 0.98).toFixed(2);
-        calcCost();
-        document.getElementById('tradeModal').style.display = 'flex';
-    }
+/*
+1. Remove the margin in all browsers.
+2. Inherit line-height from `html` so users can set them as a class directly on the `html` element.
+*/
 
-    function closeModal() {
-        document.getElementById('tradeModal').style.display = 'none';
-    }
+body {
+  margin: 0;
+  /* 1 */
+  line-height: inherit;
+  /* 2 */
+}
 
-    function calcCost() {
-        if (!selectedAsset) return;
-        let q = parseInt(document.getElementById('mQty').value) || 1;
-        let cost = +(selectedAsset.price * q).toFixed(2);
-        document.getElementById('mCost').innerText = '₹ ' + cost.toLocaleString('en-IN');
-    }
+/*
+1. Add the correct height in Firefox.
+2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
+3. Ensure horizontal rules are visible by default.
+*/
 
-    function executeTrade(side) {
-        let q = parseInt(document.getElementById('mQty').value) || 1;
-        let cost = +(selectedAsset.price * q).toFixed(2);
-        let target = parseFloat(document.getElementById('mTarget').value);
-        let sl = parseFloat(document.getElementById('mSL').value);
+hr {
+  height: 0;
+  /* 1 */
+  color: inherit;
+  /* 2 */
+  border-top-width: 1px;
+  /* 3 */
+}
 
-        if (cost > db.capital) { alert('Insufficient paper capital!'); return; }
+/*
+Add the correct text decoration in Chrome, Edge, and Safari.
+*/
 
-        db.capital = +(db.capital - cost).toFixed(2);
-        db.positions.push({
-            sym: selectedAsset.sym,
-            side: side,
-            qty: q,
-            avg: selectedAsset.price,
-            ltp: selectedAsset.price,
-            highPrice: selectedAsset.price,
-            target: target,
-            sl: sl,
-            mode: 'Manual'
-        });
+abbr:where([title]) {
+  -webkit-text-decoration: underline dotted;
+          text-decoration: underline dotted;
+}
 
-        db.orders.unshift({
-            time: new Date().toLocaleTimeString(),
-            sym: selectedAsset.sym,
-            side: side,
-            qty: q,
-            price: selectedAsset.price,
-            status: 'EXECUTED'
-        });
+/*
+Remove the default font size and weight for headings.
+*/
 
-        persist();
-        closeModal();
-        switchNav('portfolio');
-    }
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
 
-    function toggleStockAlgo(symOverride, priceOverride) {
-        let sym = symOverride || selectedAsset.sym;
-        let qty = symOverride ? Math.max(1, Math.ceil(500 / priceOverride)) : (parseInt(document.getElementById('mQty').value) || 1);
-        
-        let ex = db.algos.find(x => x.sym === sym);
-        if (ex) {
-            ex.active = !ex.active;
-        } else {
-            db.algos.push({ sym: sym, qty: qty, active: true });
-        }
-        persist();
-        closeModal();
-        renderMain();
-    }
+/*
+Reset links to optimize for opt-in styling instead of opt-out.
+*/
 
-    function closePosition(idx, reason) {
-        let p = db.positions[idx];
-        let pnl = p.side === 'BUY' ? (p.ltp - p.avg) * p.qty : (p.avg - p.ltp) * p.qty;
-        let refund = (p.avg * p.qty) + pnl;
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
 
-        db.capital = +(db.capital + refund).toFixed(2);
-        db.dailyPnl = +(db.dailyPnl + pnl).toFixed(2);
+/*
+Add the correct font weight in Edge and Safari.
+*/
 
-        db.history.unshift({
-            time: new Date().toLocaleTimeString(),
-            sym: p.sym,
-            qty: p.qty,
-            inP: p.avg,
-            outP: p.ltp,
-            pnl: +pnl.toFixed(2),
-            reason: reason
-        });
+b,
+strong {
+  font-weight: bolder;
+}
 
-        db.positions.splice(idx, 1);
-        persist();
-        renderMain();
-    }
+/*
+1. Use the user's configured `mono` font-family by default.
+2. Use the user's configured `mono` font-feature-settings by default.
+3. Use the user's configured `mono` font-variation-settings by default.
+4. Correct the odd `em` font sizing in all browsers.
+*/
 
-    function renderMain() {
-        let screen = document.getElementById('mainScreen');
-        let filtered = stocks.filter(s => s.sym.toLowerCase().includes(searchQuery.toLowerCase()));
+code,
+kbd,
+samp,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  /* 1 */
+  font-feature-settings: normal;
+  /* 2 */
+  font-variation-settings: normal;
+  /* 3 */
+  font-size: 1em;
+  /* 4 */
+}
 
-        if (currentNav === 'home') {
-            let h = `
-                <div style="background:linear-gradient(135deg, #1E232F, #181D27); margin:12px 14px; padding:14px; border-radius:10px; border:1px solid #2B3139; display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <div style="font-size:13px; font-weight:700;">KHAN AI PAPER TERMINAL</div>
-                        <div style="font-size:12px; color:#0ECB81; margin-top:4px;">Capital: ₹${db.capital.toLocaleString('en-IN')} | Daily P&L: ₹${db.dailyPnl.toFixed(2)}</div>
-                    </div>
-                    <button class="btn btn-blue" onclick="switchNav('watchlist')">Trade Now</button>
-                </div>
+/*
+Add the correct font size in all browsers.
+*/
 
-                <div class="section-title"><span>Stocks You're Interested In</span><span style="color:#3861FB; font-size:11px; cursor:pointer;" onclick="switchNav('watchlist')">View All ></span></div>
-            `;
-            filtered.filter(s => s.tag === 'interested').forEach(s => {
-                h += `
-                    <div class="stock-row" onclick="openModal('${s.sym}', ${s.p})">
-                        <div>
-                            <div class="s-name">${s.sym}</div>
-                            <div class="s-sub">${s.exch} • Tap to Trade</div>
-                        </div>
-                        <div class="s-price-col">
-                            <div class="s-ltp up" id="price-${s.sym}">₹ ${s.p.toLocaleString('en-IN')}</div>
-                            <div class="s-chg up">${s.chg}</div>
-                        </div>
-                    </div>
-                `;
-            });
+small {
+  font-size: 80%;
+}
 
-            h += `<div class="section-title"><span>Top Movers</span></div>`;
-            filtered.filter(s => s.tag === 'mover').forEach(s => {
-                h += `
-                    <div class="stock-row" onclick="openModal('${s.sym}', ${s.p})">
-                        <div>
-                            <div class="s-name">${s.sym}</div>
-                            <div class="s-sub">${s.exch} • Tap to Trade</div>
-                        </div>
-                        <div class="s-price-col">
-                            <div class="s-ltp up" id="price-${s.sym}">₹ ${s.p.toLocaleString('en-IN')}</div>
-                            <div class="s-chg up">${s.chg}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            screen.innerHTML = h;
+/*
+Prevent `sub` and `sup` elements from affecting the line height in all browsers.
+*/
 
-        } else if (currentNav === 'watchlist') {
-            let h = `<div class="section-title"><span>Watchlist & AI Algo Bots (${filtered.length})</span></div>`;
-            filtered.forEach(s => {
-                let isAlgo = db.algos.some(x => x.sym === s.sym && x.active);
-                h += `
-                    <div class="stock-row">
-                        <div onclick="openModal('${s.sym}', ${s.p})" style="flex:1; cursor:pointer;">
-                            <div class="s-name">${s.sym}</div>
-                            <div class="s-sub">${s.exch}</div>
-                        </div>
-                        <div class="s-price-col" onclick="openModal('${s.sym}', ${s.p})" style="margin-right:12px; cursor:pointer;">
-                            <div class="s-ltp ${s.chg.includes('-') ? 'down' : 'up'}" id="price-${s.sym}">₹ ${s.p.toLocaleString('en-IN')}</div>
-                            <div class="s-chg ${s.chg.includes('-') ? 'down' : 'up'}">${s.chg}</div>
-                        </div>
-                        <button class="btn ${isAlgo ? 'btn-red' : 'btn-blue'}" onclick="toggleStockAlgo('${s.sym}', ${s.p})">${isAlgo ? 'Stop Bot' : '+ Algo'}</button>
-                    </div>
-                `;
-            });
-            screen.innerHTML = h;
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
 
-        } else if (currentNav === 'options') {
-            let h = `
-                <div style="padding:14px; background:#181D27; font-weight:700; border-bottom:1px solid #262D3D; display:flex; justify-content:space-between;">
-                    <span>NIFTY OPTION CHAIN (F&O)</span>
-                    <span style="color:#0ECB81;">Spot: ₹25,144.30</span>
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 0.8fr 1fr; text-align:center; background:#151A24; padding:8px; font-size:11px; color:#848E9C; font-weight:700;">
-                    <div>CALL (CE)</div><div>STRIKE</div><div>PUT (PE)</div>
-                </div>
-            `;
-            [25000, 25100, 25200, 25300].forEach(st => {
-                let ceP = +(110 + Math.random() * 15).toFixed(2);
-                let peP = +(95 + Math.random() * 15).toFixed(2);
-                h += `
-                    <div style="display:grid; grid-template-columns:1fr 0.8fr 1fr; text-align:center; border-bottom:1px solid #1E232F; font-size:13px; align-items:center;">
-                        <div style="padding:14px; color:#0ECB81; font-weight:700; cursor:pointer;" onclick="openModal('NIFTY ${st} CE', ${ceP})">₹${ceP}</div>
-                        <div style="background:#181D27; padding:14px; font-weight:700; color:#F0B90B;">${st}</div>
-                        <div style="padding:14px; color:#F6465D; font-weight:700; cursor:pointer;" onclick="openModal('NIFTY ${st} PE', ${peP})">₹${peP}</div>
-                    </div>
-                `;
-            });
-   
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+/*
+1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
+2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
+3. Remove gaps between table borders by default.
+*/
+
+table {
+  text-indent: 0;
+  /* 1 */
+  border-color: inherit;
+  /* 2 */
+  border-collapse: collapse;
+  /* 3 */
+}
+
+/*
+1. Change the font styles in all browsers.
+2. Remove the margin in Firefox and Safari.
+3. Remove default padding in all browsers.
+*/
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  /* 1 */
+  font-feature-settings: inherit;
+  /* 1 */
+  font-variation-settings: inherit;
+  /* 1 */
+  font-size: 100%;
+  /* 1 */
+  font-weight: inherit;
+  /* 1 */
+  line-height: inherit;
+  /* 1 */
+  letter-spacing: inherit;
+  /* 1 */
+  color: inherit;
+  /* 1 */
+  margin: 0;
+  /* 2 */
+  padding: 0;
+  /* 3 */
+}
+
+/*
+Remove the inheritance of text transform in Edge and Firefox.
+*/
+
+button,
+select {
+  text-transform: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Remove default button styles.
+*/
+
+button,
+input:where([type='button']),
+input:where([type='reset']),
+input:where([type='submit']) {
+  -webkit-appearance: button;
+  /* 1 */
+  background-color: transparent;
+  /* 2 */
+  background-image: none;
+  /* 2 */
+}
+
+/*
+Use the modern Firefox focus style for all focusable elements.
+*/
+
+:-moz-focusring {
+  outline: auto;
+}
+
+/*
+Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
+*/
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+/*
+Add the correct vertical alignment in Chrome and Firefox.
+*/
+
+progress {
+  vertical-align: baseline;
+}
+
+/*
+Correct the cursor style of increment and decrement buttons in Safari.
+*/
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/*
+1. Correct the odd appearance in Chrome and Safari.
+2. Correct the outline style in Safari.
+*/
+
+[type='search'] {
+  -webkit-appearance: textfield;
+  /* 1 */
+  outline-offset: -2px;
+  /* 2 */
+}
+
+/*
+Remove the inner padding in Chrome and Safari on macOS.
+*/
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Change font properties to `inherit` in Safari.
+*/
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  /* 1 */
+  font: inherit;
+  /* 2 */
+}
+
+/*
+Add the correct display in Chrome and Safari.
+*/
+
+summary {
+  display: list-item;
+}
+
+/*
+Removes the default spacing and border for appropriate elements.
+*/
+
+blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+ol,
+ul,
+menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+Reset default styling for dialogs.
+*/
+
+dialog {
+  padding: 0;
+}
+
+/*
+Prevent resizing textareas horizontally by default.
+*/
+
+textarea {
+  resize: vertical;
+}
+
+/*
+1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
+2. Set the default placeholder color to the user's configured gray 400 color.
+*/
+
+input::-moz-placeholder, textarea::-moz-placeholder {
+  opacity: 1;
+  /* 1 */
+  color: #9ca3af;
+  /* 2 */
+}
+
+input::placeholder,
+textarea::placeholder {
+  opacity: 1;
+  /* 1 */
+  color: #9ca3af;
+  /* 2 */
+}
+
+/*
+Set the default cursor for buttons.
+*/
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+/*
+Make sure disabled buttons don't get the pointer cursor.
+*/
+
+:disabled {
+  cursor: default;
+}
+
+/*
+1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)
+2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)
+   This can trigger a poorly considered lint error in some tools but is included by design.
+*/
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block;
+  /* 1 */
+  vertical-align: middle;
+  /* 2 */
+}
+
+/*
+Constrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)
+*/
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Make elements with the HTML hidden attribute stay hidden by default */
+
+[hidden]:where(:not([hidden="until-found"])) {
+  display: none;
+}
+
+.fixed{
+  position: fixed;
+}
+
+.absolute{
+  position: absolute;
+}
+
+.relative{
+  position: relative;
+}
+
+.sticky{
+  position: sticky;
+}
+
+.inset-0{
+  inset: 0px;
+}
+
+.-bottom-0{
+  bottom: -0px;
+}
+
+.bottom-0{
+  bottom: 0px;
+}
+
+.bottom-\[68px\]{
+  bottom: 68px;
+}
+
+.bottom-\[76px\]{
+  bottom: 76px;
+}
+
+.bottom-\[92px\]{
+  bottom: 92px;
+}
+
+.left-0{
+  left: 0px;
+}
+
+.left-1\/2{
+  left: 50%;
+}
+
+.right-0{
+  right: 0px;
+}
+
+.top-\[var\(--safe-area-inset-top\)\]{
+  top: var(--safe-area-inset-top);
+}
+
+.z-20{
+  z-index: 20;
+}
+
+.z-40{
+  z-index: 40;
+}
+
+.z-50{
+  z-index: 50;
+}
+
+.z-\[60\]{
+  z-index: 60;
+}
+
+.col-span-2{
+  grid-column: span 2 / span 2;
+}
+
+.mx-auto{
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.-mt-1{
+  margin-top: -0.25rem;
+}
+
+.mb-2{
+  margin-bottom: 0.5rem;
+}
+
+.ml-1{
+  margin-left: 0.25rem;
+}
+
+.ml-auto{
+  margin-left: auto;
+}
+
+.mt-0\.5{
+  margin-top: 0.125rem;
+}
+
+.mt-1{
+  margin-top: 0.25rem;
+}
+
+.mt-1\.5{
+  margin-top: 0.375rem;
+}
+
+.mt-2{
+  margin-top: 0.5rem;
+}
+
+.mt-2\.5{
+  margin-top: 0.625rem;
+}
+
+.mt-3{
+  margin-top: 0.75rem;
+}
+
+.mt-4{
+  margin-top: 1rem;
+}
+
+.mt-5{
+  margin-top: 1.25rem;
+}
+
+.block{
+  display: block;
+}
+
+.inline{
+  display: inline;
+}
+
+.flex{
+  display: flex;
+}
+
+.grid{
+  display: grid;
+}
+
+.h-14{
+  height: 3.5rem;
+}
+
+.h-3{
+  height: 0.75rem;
+}
+
+.h-4{
+  height: 1rem;
+}
+
+.h-8{
+  height: 2rem;
+}
+
+.h-9{
+  height: 2.25rem;
+}
+
+.h-\[280px\]{
+  height: 280px;
+}
+
+.h-\[3px\]{
+  height: 3px;
+}
+
+.h-fit{
+  height: -moz-fit-content;
+  height: fit-content;
+}
+
+.max-h-\[140px\]{
+  max-height: 140px;
+}
+
+.min-h-screen{
+  min-height: 100vh;
+}
+
+.w-14{
+  width: 3.5rem;
+}
+
+.w-4{
+  width: 1rem;
+}
+
+.w-8{
+  width: 2rem;
+}
+
+.w-9{
+  width: 2.25rem;
+}
+
+.w-full{
+  width: 100%;
+}
+
+.min-w-0{
+  min-width: 0px;
+}
+
+.min-w-\[158px\]{
+  min-width: 158px;
+}
+
+.min-w-\[180px\]{
+  min-width: 180px;
+}
+
+.min-w-\[210px\]{
+  min-width: 210px;
+}
+
+.max-w-\[480px\]{
+  max-width: 480px;
+}
+
+.max-w-\[92\%\]{
+  max-width: 92%;
+}
+
+.flex-1{
+  flex: 1 1 0%;
+}
+
+.shrink-0{
+  flex-shrink: 0;
+}
+
+.-translate-x-1\/2{
+  --tw-translate-x: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.cursor-pointer{
+  cursor: pointer;
+}
+
+.grid-cols-2{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-cols-3{
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.flex-col{
+  flex-direction: column;
+}
+
+.flex-wrap{
+  flex-wrap: wrap;
+}
+
+.place-items-center{
+  place-items: center;
+}
+
+.items-start{
+  align-items: flex-start;
+}
+
+.items-end{
+  align-items: flex-end;
+}
+
+.items-center{
+  align-items: center;
+}
+
+.justify-center{
+  justify-content: center;
+}
+
+.justify-between{
+  justify-content: space-between;
+}
+
+.gap-0\.5{
+  gap: 0.125rem;
+}
+
+.gap-1{
+  gap: 0.25rem;
+}
+
+.gap-1\.5{
+  gap: 0.375rem;
+}
+
+.gap-2{
+  gap: 0.5rem;
+}
+
+.gap-3{
+  gap: 0.75rem;
+}
+
+.gap-4{
+  gap: 1rem;
+}
+
+.gap-6{
+  gap: 1.5rem;
+}
+
+.space-y-1 > :not([hidden]) ~ :not([hidden]){
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
+}
+
+.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.375rem * var(--tw-space-y-reverse));
+}
+
+.space-y-2 > :not([hidden]) ~ :not([hidden]){
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.5rem * var(--tw-space-y-reverse));
+}
+
+.overflow-x-auto{
+  overflow-x: auto;
+}
+
+.overflow-y-auto{
+  overflow-y: auto;
+}
+
+.overflow-x-clip{
+  overflow-x: clip;
+}
+
+.truncate{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.whitespace-nowrap{
+  white-space: nowrap;
+}
+
+.rounded{
+  border-radius: 0.25rem;
+}
+
+.rounded-2xl{
+  border-radius: 1rem;
+}
+
+.rounded-full{
+  border-radius: 9999px;
+}
+
+.rounded-lg{
+  border-radius: 0.5rem;
+}
+
+.rounded-xl{
+  border-radius: 0.75rem;
+}
+
+.rounded-t-3xl{
+  border-top-left-radius: 1.5rem;
+  border-top-right-radius: 1.5rem;
+}
+
+.rounded-t-none{
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+.border{
+  border-width: 1px;
+}
+
+.border-b{
+  border-bottom-width: 1px;
+}
+
+.border-b-2{
+  border-bottom-width: 2px;
+}
+
+.border-t{
+  border-top-width: 1px;
+}
+
+.border-\[\#2ec4a6\]{
+  --tw-border-opacity: 1;
+  border-color: rgb(46 196 166 / var(--tw-border-opacity, 1));
+}
+
+.border-\[\#2ec4a6\]\/40{
+  border-color: rgb(46 196 166 / 0.4);
+}
+
+.border-\[\#6a7dff\]{
+  --tw-border-opacity: 1;
+  border-color: rgb(106 125 255 / var(--tw-border-opacity, 1));
+}
+
+.border-\[\#6a7dff\]\/30{
+  border-color: rgb(106 125 255 / 0.3);
+}
+
+.border-\[\#ff6b6b\]{
+  --tw-border-opacity: 1;
+  border-color: rgb(255 107 107 / var(--tw-border-opacity, 1));
+}
+
+.border-\[\#ff6b6b\]\/40{
+  border-color: rgb(255 107 107 / 0.4);
+}
+
+.border-amber-400\/30{
+  border-color: rgb(251 191 36 / 0.3);
+}
+
+.border-white{
+  --tw-border-opacity: 1;
+  border-color: rgb(255 255 255 / var(--tw-border-opacity, 1));
+}
+
+.border-white\/10{
+  border-color: rgb(255 255 255 / 0.1);
+}
+
+.border-white\/5{
+  border-color: rgb(255 255 255 / 0.05);
+}
+
+.bg-\[\#08080a\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(8 8 10 / var(--tw-bg-opacity, 1));
+}
+
+.bg-\[\#0f2e25\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(15 46 37 / var(--tw-bg-opacity, 1));
+}
+
+.bg-\[\#101a24\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(16 26 36 / var(--tw-bg-opacity, 1));
+}
+
+.bg-\[\#121212\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(18 18 18 / var(--tw-bg-opacity, 1));
+}
+
+.bg-\[\#121212\]\/95{
+  background-color: rgb(18 18 18 / 0.95);
+}
+
+.bg-\[\#123a2e\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(18 58 46 / var(--tw-bg-opacity, 1));
+}
+
+.bg-\[\#1a1a1a\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(26 26 26 / var(--tw-bg-opacity, 1));
+}
+
+.bg-\[\#1e1e1e\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(30 30 30 / var(--tw-bg-opacity, 1));
+}
+
+.bg-\[\#2a2a2a\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(42 42 42 / var(--tw-bg-opacity, 1));
+}
+
+.bg-\[\#2a2a35\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(42 42 53 / var(--tw-bg-opacity, 1));
+}
+
+.bg-\[\#2e0f0f\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(46 15 15 / var(--tw-bg-opacity, 1));
+}
+
+.bg-\[\#2ec4a6\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(46 196 166 / var(--tw-bg-opacity, 1));
+}
+
+.bg-\[\#2ec4a6\]\/10{
+  background-color: rgb
