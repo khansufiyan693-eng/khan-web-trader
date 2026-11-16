@@ -1,394 +1,411 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>KHAN AI TRADER</title>
-<style>
-:root{
- --bg:#f4f6fa;--white:#fff;--text:#172033;--muted:#8490a3;
- --blue:#2457e6;--green:#07966b;--red:#e34459;--line:#e8ebf1;
- --navy:#101d38;--gold:#d99b28;
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;padding-bottom:78px}
-button,input,select{font:inherit}
-button{cursor:pointer}
-.top{
- background:var(--navy);color:white;padding:17px 17px 19px;
- border-radius:0 0 22px 22px;
-}
-.topline{display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:18px;font-weight:900;letter-spacing:.3px}
-.logo small{display:block;font-size:9px;color:#aab9d6;letter-spacing:2px;margin-top:4px}
-.iconbtn{border:1px solid #405071;background:#1b2b4c;color:white;padding:9px 12px;border-radius:10px}
-.market-status{font-size:10px;color:#9eb1d2;margin-top:14px}
-.market-status b{color:#ffc65b}
-.balance-row{display:flex;justify-content:space-between;align-items:end;margin-top:17px}
-.balance-label{font-size:11px;color:#aab9d6}
-.balance{font-size:28px;font-weight:800;margin-top:5px}
-.pnl{text-align:right;font-size:17px;font-weight:bold;color:#45dda8}
-.pnl small{display:block;font-size:10px;color:#aab9d6;font-weight:normal;margin-bottom:5px}
-.container{padding:17px;max-width:900px;margin:auto}
-.page{display:none}
-.page.active{display:block;animation:fade .16s ease}
-@keyframes fade{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
-.heading{font-size:19px;font-weight:800;margin:5px 0 15px}
-.subheading{font-size:14px;font-weight:800;margin:18px 0 11px}
-.card{background:white;border-radius:15px;padding:16px;margin-bottom:12px;border:1px solid var(--line)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat{background:white;border:1px solid var(--line);border-radius:13px;padding:14px}
-.stat .label{font-size:10px;color:var(--muted)}
-.stat strong{display:block;font-size:19px;margin-top:8px}
-.stat small{font-size:10px;color:var(--muted)}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.muted{color:var(--muted);font-size:11px}
-.green{color:var(--green)!important}.red{color:var(--red)!important}
-.blue{color:var(--blue)!important}
-.badge{font-size:9px;padding:5px 8px;border-radius:20px;background:#fff3d9;color:#9b6c13}
-.badge.greenbg{background:#e4f8f0;color:var(--green)}
-.badge.redbg{background:#ffeaed;color:var(--red)}
-.btn{border:0;border-radius:9px;padding:11px 14px;background:var(--blue);color:white;font-weight:700;font-size:12px}
-.btn.greenbtn{background:var(--green)}
-.btn.redbtn{background:var(--red)}
-.btn.lightbtn{background:#edf1fb;color:var(--blue)}
-.btn.full{width:100%;margin-top:12px}
-.btn.smallbtn{padding:8px 10px}
-input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;background:white;color:var(--text);outline:none}
-label{font-size:11px;color:var(--muted);display:block;margin-bottom:7px}
-.field{margin:12px 0}
-table{width:100%;border-collapse:collapse;font-size:11px}
-th,td{text-align:left;padding:12px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-th{color:var(--muted);font-weight:500}
-.tablewrap{overflow-x:auto}
-.stock-name{font-weight:bold;font-size:12px}
-.stock-sub{font-size:10px;color:var(--muted);margin-top:4px}
-.stock-price{text-align:right;font-weight:bold;font-size:13px}
-.stock-change{text-align:right;font-size:10px;margin-top:4px}
-.stockrow{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}
-.stockrow:last-child{border:0}
-.quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:15px 0}
-.quick{background:white;border:1px solid var(--line);border-radius:12px;text-align:center;padding:13px 3px;font-size:10px;color:var(--text)}
-.quick span{display:block;font-size:21px;margin-bottom:7px}
-.bottomnav{
- position:fixed;bottom:0;left:0;right:0;height:69px;background:white;
- border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);
- z-index:99;padding-bottom:env(safe-area-inset-bottom);
-}
-.navbtn{border:0;background:white;color:#8993a5;font-size:9px;font-weight:600}
-.navbtn span{display:block;font-size:20px;margin-bottom:4px}
-.navbtn.active{color:var(--blue)}
-.navbtn.active span{transform:translateY(-2px)}
-.menuitem{display:flex;align-items:center;justify-content:space-between;padding:16px 3px;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer}
-.menuitem b{font-size:18px;color:#9aa5b7}
-.notice{background:#fff6e5;color:#936819;padding:12px;border-radius:10px;font-size:11px;line-height:1.5;margin-bottom:12px}
-.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.empty{text-align:center;color:var(--muted);padding:25px;font-size:12px}
-.segment{display:flex;background:#eef1f7;padding:4px;border-radius:10px;gap:4px}
-.segment button{flex:1;border:0;background:transparent;padding:9px;border-radius:8px;font-size:11px}
-.segment button.active{background:white;color:var(--blue);font-weight:bold}
-.hidden{display:none!important}
-@media(min-width:700px){
- .container{padding:22px}
- .grid2{grid-template-columns:repeat(4,1fr)}
- .bottomnav{left:50%;transform:translateX(-50%);max-width:900px;border-radius:15px 15px 0 0}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KHAN AI TRADER - Angel One Pro Terminal</title>
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { margin: 0; padding: 0; background-color: #0B0E14; color: #EAECEF; }
+        .app { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; height: 100vh; background: #12161F; position: relative; }
+        
+        /* Header Search Bar */
+        .header-top { background: #181D27; padding: 10px 14px; border-bottom: 1px solid #262D3D; display: flex; align-items: center; gap: 10px; }
+        .search-box { flex: 1; background: #12161F; border: 1px solid #2B3139; border-radius: 8px; display: flex; align-items: center; padding: 8px 12px; }
+        .search-box input { background: transparent; border: none; color: #FFF; font-size: 13px; width: 100%; outline: none; }
+        
+        /* Category Tabs */
+        .cat-scroll { display: flex; background: #181D27; overflow-x: auto; padding: 0 10px 8px 10px; gap: 16px; border-bottom: 1px solid #262D3D; white-space: nowrap; scrollbar-width: none; }
+        .cat-scroll::-webkit-scrollbar { display: none; }
+        .cat-item { font-size: 13px; font-weight: 600; color: #848E9C; cursor: pointer; padding-bottom: 4px; }
+        .cat-item.active { color: #3861FB; border-bottom: 2px solid #3861FB; }
+
+        /* Index Ticker Scroll */
+        .ticker-scroll { display: flex; background: #181D27; padding: 10px 14px; gap: 10px; overflow-x: auto; border-bottom: 1px solid #262D3D; scrollbar-width: none; }
+        .ticker-card { background: #151A24; padding: 8px 12px; border-radius: 6px; min-width: 140px; border: 1px solid #262D3D; cursor: pointer; flex-shrink: 0; }
+        .ticker-title { font-size: 10px; color: #848E9C; font-weight: 700; display: flex; justify-content: space-between; }
+        .ticker-val { font-size: 13px; font-weight: 700; margin-top: 3px; }
+        .up { color: #0ECB81; font-weight: 700; }
+        .down { color: #F6465D; font-weight: 700; }
+
+        /* Main Container */
+        .main { flex: 1; overflow-y: auto; padding-bottom: 75px; background: #12161F; }
+        .section-title { padding: 14px 14px 6px 14px; font-size: 13px; font-weight: 700; color: #848E9C; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Stock Rows & Cards */
+        .stock-row { padding: 12px 14px; border-bottom: 1px solid #1E232F; display: flex; justify-content: space-between; align-items: center; background: #12161F; }
+        .s-name { font-size: 14px; font-weight: 700; }
+        .s-sub { font-size: 11px; color: #848E9C; margin-top: 2px; }
+        .s-price-col { text-align: right; }
+        .s-ltp { font-size: 14px; font-weight: 700; }
+        .s-chg { font-size: 11px; margin-top: 2px; }
+
+        /* Tool Grid (Portfolio) */
+        .tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px; }
+        .tool-card { background: #181D27; border: 1px solid #262D3D; padding: 14px 10px; border-radius: 8px; text-align: center; cursor: pointer; }
+        .tool-icon { font-size: 20px; margin-bottom: 6px; }
+        .tool-label { font-size: 11px; font-weight: 600; color: #C9D1D9; }
+
+        /* Buttons */
+        .btn { border: none; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; color: #FFF; }
+        .btn-blue { background: #3861FB; }
+        .btn-green { background: #0ECB81; color: #000; }
+        .btn-red { background: #F6465D; }
+        .btn-gray { background: #2B3139; color: #EAECEF; }
+
+        /* Bottom Navigation Bar (Angel One Exact) */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: #181D27; border-top: 1px solid #262D3D; display: flex; z-index: 50; }
+        .nav-item { flex: 1; padding: 8px 0; text-align: center; color: #848E9C; font-size: 10px; font-weight: 600; cursor: pointer; }
+        .nav-item.active { color: #3861FB; }
+        .nav-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+
+        /* Order / Trade Modal Drawer */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; justify-content: flex-end; flex-direction: column; }
+        .modal-box { background: #181D27; padding: 20px; border-top-left-radius: 16px; border-top-right-radius: 16px; border-top: 1px solid #2B3139; max-width: 480px; width: 100%; margin: 0 auto; }
+        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 13px; color: #848E9C; }
+        .inp { background: #12161F; border: 1px solid #2B3139; color: #FFF; padding: 8px 12px; border-radius: 6px; width: 130px; text-align: right; font-size: 14px; font-weight: 700; outline: none; }
+    </style>
 </head>
-<body>
+<body onload="initApp()">
 
-<header class="top">
- <div class="topline">
-  <div class="logo">KHAN AI TRADER<small>SMART TRADING TERMINAL</small></div>
-  <button class="iconbtn" onclick="openPage('account')">👤 Account</button>
- </div>
- <div class="market-status">MARKET STATUS: <b>SIMULATION MODE</b> · BROKER: NOT CONNECTED</div>
- <div class="balance-row">
-  <div><div class="balance-label">Available Paper Balance</div><div class="balance" id="headerBalance">₹5,000.00</div></div>
-  <div class="pnl"><small>OPEN P&L</small><span id="headerPnl">₹0.00</span></div>
- </div>
-</header>
+<div class="app">
+    <!-- Header Search Bar -->
+    <div class="header-top">
+        <div class="search-box">
+            <span style="margin-right:8px; color:#848E9C;">🔍</span>
+            <input type="text" id="globalSearch" placeholder="Search Nifty, Stocks, F&O..." oninput="handleSearch(this.value)">
+        </div>
+        <div style="font-size:18px; cursor:pointer;" onclick="switchNav('account')">👤</div>
+    </div>
 
-<main class="container">
+    <!-- Category Tabs -->
+    <div class="cat-scroll">
+        <div class="cat-item active" id="cat-stocks" onclick="filterCategory('stocks')">Stocks</div>
+        <div class="cat-item" id="cat-fo" onclick="switchNav('options')">F&O</div>
+        <div class="cat-item" id="cat-mf" onclick="alert('Mutual Funds Section (Paper Mode)')">Mutual Funds</div>
+        <div class="cat-item" id="cat-loans" onclick="alert('Instant Loan Feature Active')">Loans</div>
+        <div class="cat-item" id="cat-comm" onclick="alert('Commodity Market Active')">Commodity</div>
+    </div>
 
-<!-- HOME -->
-<section class="page active" id="home">
- <div class="heading">Home Dashboard</div>
- <div class="grid2">
-  <div class="stat"><div class="label">Today's P&L</div><strong id="homePnl">₹0.00</strong><small>Paper trading</small></div>
-  <div class="stat"><div class="label">Open Positions</div><strong id="homePositions">0</strong><small>Active trades</small></div>
-  <div class="stat"><div class="label">Total Orders</div><strong id="homeOrders">0</strong><small>Order records</small></div>
-  <div class="stat"><div class="label">Closed Trades</div><strong id="homeClosed">0</strong><small>Trade history</small></div>
- </div>
+    <!-- Market Indices Ticker -->
+    <div class="ticker-scroll" id="tickerScroll"></div>
 
- <div class="quick-actions">
-  <button class="quick" onclick="openPage('market')"><span>📈</span>Market</button>
-  <button class="quick" onclick="openPage('portfolio')"><span>💼</span>Portfolio</button>
-  <button class="quick" onclick="openPage('orders')"><span>📝</span>Orders</button>
-  <button class="quick" onclick="openPage('account')"><span>⚙️</span>Settings</button>
- </div>
+    <!-- Dynamic Main Screen -->
+    <div class="main" id="mainScreen"></div>
 
- <div class="row subheading"><span>Market Watch</span><button class="btn lightbtn smallbtn" onclick="openPage('market')">View All</button></div>
- <div class="card" id="homeWatch"></div>
+    <!-- Bottom Navigation Bar (Angel One Exact) -->
+    <div class="bottom-nav">
+        <div class="nav-item active" id="nav-home" onclick="switchNav('home')"><span class="nav-icon">🏠</span>HOME</div>
+        <div class="nav-item" id="nav-watchlist" onclick="switchNav('watchlist')"><span class="nav-icon">⭐</span>WATCHLIST</div>
+        <div class="nav-item" id="nav-portfolio" onclick="switchNav('portfolio')"><span class="nav-icon">💼</span>PORTFOLIO</div>
+        <div class="nav-item" id="nav-orders" onclick="switchNav('orders')"><span class="nav-icon">📋</span>ORDERS</div>
+        <div class="nav-item" id="nav-account" onclick="switchNav('account')"><span class="nav-icon">👤</span>ACCOUNT</div>
+    </div>
+</div>
 
- <div class="subheading">Trading Engine</div>
- <div class="card">
-  <div class="row"><span class="muted">Paper Trading</span><span class="badge greenbg">AVAILABLE</span></div>
-  <div class="row" style="margin-top:13px"><span class="muted">Angel One API</span><span class="badge redbg">NOT CONNECTED</span></div>
-  <div class="row" style="margin-top:13px"><span class="muted">Live Orders</span><span class="badge redbg">DISABLED</span></div>
- </div>
- <div class="notice">This version uses simulated prices and paper orders. It does not connect to Angel One or place real trades.</div>
-</section>
+<!-- Trade Execution & Algo Modal -->
+<div class="modal-overlay" id="tradeModal">
+    <div class="modal-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #262D3D; padding-bottom:10px; margin-bottom:14px;">
+            <div>
+                <strong id="mSym" style="font-size:16px;">SYMBOL</strong>
+                <div id="mPrice" style="font-size:12px; color:#0ECB81; margin-top:2px;">LTP: ₹0</div>
+            </div>
+            <button class="btn btn-gray" onclick="closeModal()">✕</button>
+        </div>
 
-<!-- MARKET -->
-<section class="page" id="market">
- <div class="heading">Market</div>
- <div class="card">
-  <div class="row"><b>Market Watch</b><span class="badge">SAMPLE PRICES</span></div>
-  <div id="marketList"></div>
- </div>
- <div class="card">
-  <b>Place Paper Trade</b>
-  <div class="field"><label>Instrument</label><select id="tradeSymbol"></select></div>
-  <div class="segment"><button id="buyTab" class="active" onclick="chooseSide('BUY')">BUY</button><button id="sellTab" onclick="chooseSide('SELL')">SELL</button></div>
-  <input type="hidden" id="tradeSide" value="BUY">
-  <div class="formgrid">
-   <div class="field"><label>Quantity</label><input id="tradeQty" type="number" min="1" value="1"></div>
-   <div class="field"><label>Order Type</label><select><option>Market (Paper)</option></select></div>
-   <div class="field"><label>Stop Loss (optional)</label><input id="tradeSL" type="number" placeholder="Price"></div>
-   <div class="field"><label>Target (optional)</label><input id="tradeTarget" type="number" placeholder="Price"></div>
-  </div>
-  <button class="btn greenbtn full" onclick="placeTrade()">Confirm Paper Order</button>
- </div>
- <div class="notice">Prices shown here are illustrative, not live exchange prices.</div>
-</section>
+        <div class="input-row">
+            <span>Quantity</span>
+            <input type="number" id="mQty" class="inp" value="1" oninput="calcCost()">
+        </div>
+        <div class="input-row">
+            <span>Profit Target (₹)</span>
+            <input type="number" id="mTarget" class="inp" style="color:#0ECB81;" step="0.5">
+        </div>
+        <div class="input-row">
+            <span>Stop Loss (₹)</span>
+            <input type="number" id="mSL" class="inp" style="color:#F6465D;" step="0.5">
+        </div>
 
-<!-- ORDERS -->
-<section class="page" id="orders">
- <div class="heading">Orders</div>
- <div class="card">
-  <div class="row"><b>Order Book</b><button class="btn lightbtn smallbtn" onclick="exportOrders()">Export</button></div>
-  <div class="tablewrap" style="margin-top:10px">
-   <table><thead><tr><th>Time</th><th>Symbol</th><th>Side</th><th>Qty</th><th>Price</th><th>Status</th></tr></thead>
-   <tbody id="ordersTable"></tbody></table>
-  </div>
- </div>
- <div class="card">
-  <b>Order Information</b>
-  <p class="muted">All orders in this version are stored as local paper-trading records. No broker order is sent.</p>
- </div>
-</section>
+        <div style="background:#12161F; padding:10px; border-radius:6px; font-size:12px; margin-bottom:14px; display:flex; justify-content:space-between;">
+            <span style="color:#848E9C;">Total Investment: <strong id="mCost" style="color:#FFF;">₹0</strong></span>
+            <span style="color:#848E9C;">Capital: <strong style="color:#0ECB81;">₹<span id="mCapDisplay">5000</span></strong></span>
+        </div>
 
-<!-- PORTFOLIO -->
-<section class="page" id="portfolio">
- <div class="heading">Portfolio</div>
- <div class="grid2">
-  <div class="stat"><div class="label">Open P&L</div><strong id="portfolioPnl">₹0</strong></div>
-  <div class="stat"><div class="label">Realized P&L</div><strong id="realizedPnl">₹0</strong></div>
- </div>
- <div class="card" style="margin-top:12px">
-  <b>Open Positions</b>
-  <div class="tablewrap" style="margin-top:10px">
-   <table><thead><tr><th>Symbol</th><th>Side</th><th>Qty</th><th>Entry</th><th>LTP</th><th>P&L</th><th></th></tr></thead>
-   <tbody id="positionsTable"></tbody></table>
-  </div>
- </div>
- <div class="card">
-  <b>Closed Trades</b>
-  <div class="tablewrap" style="margin-top:10px">
-   <table><thead><tr><th>Symbol</th><th>Side</th><th>Qty</th><th>P&L</th><th>Date</th></tr></thead>
-   <tbody id="historyTable"></tbody></table>
-  </div>
- </div>
-</section>
-
-<!-- ACCOUNT -->
-<section class="page" id="account">
- <div class="heading">Account</div>
- <div class="card">
-  <div class="row"><div><b>KHAN AI TRADER</b><div class="muted">Personal Trading Terminal</div></div><span style="font-size:28px">👤</span></div>
- </div>
- <div class="card">
-  <div class="menuitem" onclick="openSub('settingsSub')"><span>⚙️ &nbsp; Settings</span><b>›</b></div>
-  <div class="menuitem" onclick="openSub('languageSub')"><span>🌐 &nbsp; Language</span><b>›</b></div>
-  <div class="menuitem" onclick="openSub('riskSub')"><span>🛡️ &nbsp; Risk Management</span><b>›</b></div>
-  <div class="menuitem" onclick="openSub('strategySub')"><span>🧠 &nbsp; Trading Strategy</span><b>›</b></div>
-  <div class="menuitem" onclick="openSub('brokerSub')"><span>🔗 &nbsp; Angel One Connection</span><b>›</b></div>
-  <div class="menuitem" onclick="openSub('aboutSub')"><span>ℹ️ &nbsp; About App</span><b>›</b></div>
- </div>
-
- <div id="settingsSub" class="card hidden">
-  <div class="row"><b>Settings</b><button class="btn lightbtn smallbtn" onclick="closeSubs()">Back</button></div>
-  <div class="field"><label>App Language</label><select id="accountLanguage" onchange="setLanguage(this.value)"><option value="en">English</option><option value="ur">اردو</option><option value="mr">मराठी</option><option value="hi">हिंदी</option></select></div>
-  <div class="field"><label>App Theme</label><select><option>Light</option></select></div>
-  <button class="btn full" onclick="saveSettings()">Save Settings</button>
- </div>
-
- <div id="languageSub" class="card hidden">
-  <div class="row"><b>Choose Language</b><button class="btn lightbtn smallbtn" onclick="closeSubs()">Back</button></div>
-  <div class="field"><label>Interface Language</label><select id="languageChoice" onchange="setLanguage(this.value)"><option value="en">English</option><option value="ur">اردو</option><option value="mr">मराठी</option><option value="hi">हिंदी</option></select></div>
-  <button class="btn full" onclick="saveSettings()">Apply Language</button>
- </div>
-
- <div id="riskSub" class="card hidden">
-  <div class="row"><b>Risk Management</b><button class="btn lightbtn smallbtn" onclick="closeSubs()">Back</button></div>
-  <div class="field"><label>Paper Capital ₹</label><input id="riskCapital" type="number"></div>
-  <div class="field"><label>Risk Per Trade ₹</label><input id="riskPerTrade" type="number"></div>
-  <div class="field"><label>Daily Maximum Loss ₹</label><input id="riskDaily" type="number"></div>
-  <div class="field"><label>Maximum Open Positions</label><input id="riskMax" type="number"></div>
-  <button class="btn full" onclick="saveRisk()">Save Risk Settings</button>
- </div>
-
- <div id="strategySub" class="card hidden">
-  <div class="row"><b>Trading Strategy</b><button class="btn lightbtn smallbtn" onclick="closeSubs()">Back</button></div>
-  <div class="field"><label>Strategy</label><select id="strategyChoice"><option>EMA 9 / EMA 21</option><option>RSI 14</option><option>EMA + RSI</option><option>Breakout</option><option>VWAP</option></select></div>
-  <div class="field"><label>Signal Mode</label><select><option>Manual Approval</option><option>Paper Simulation</option></select></div>
-  <button class="btn full" onclick="saveSettings()">Save Strategy</button>
- </div>
-
- <div id="brokerSub" class="card hidden">
-  <div class="row"><b>Angel One Connection</b><button class="btn lightbtn smallbtn" onclick="closeSubs()">Back</button></div>
-  <p class="muted">Broker: Angel One SmartAPI</p>
-  <div class="notice">API is not connected. A secure backend server, valid API credentials, broker permissions and network configuration are required.</div>
-  <div class="field"><label>Connection Status</label><input value="NOT CONNECTED" disabled></div>
-  <div class="field"><label>Live Trading</label><input value="DISABLED" disabled></div>
- </div>
-
- <div id="aboutSub" class="card hidden">
-  <div class="row"><b>About</b><button class="btn lightbtn smallbtn" onclick="closeSubs()">Back</button></div>
-  <p class="muted">KHAN AI TRADER · Paper Trading Interface</p>
-  <p class="muted">This build is a browser-based prototype. It is not an Angel One-connected trading application.</p>
- </div>
-
- <div class="card">
-  <b>Data Backup</b>
-  <p class="muted">Download your local paper trading records.</p>
-  <button class="btn lightbtn full" onclick="backupData()">Download Backup</button>
-  <button class="btn redbtn full" onclick="resetData()">Reset Paper Account</button>
- </div>
-</section>
-
-</main>
-
-<nav class="bottomnav">
- <button class="navbtn active" data-page="home" onclick="openPage('home')"><span>⌂</span>Home</button>
- <button class="navbtn" data-page="market" onclick="openPage('market')"><span>⌁</span>Market</button>
- <button class="navbtn" data-page="orders" onclick="openPage('orders')"><span>▤</span>Orders</button>
- <button class="navbtn" data-page="portfolio" onclick="openPage('portfolio')"><span>▣</span>Portfolio</button>
- <button class="navbtn" data-page="account" onclick="openPage('account')"><span>☻</span>Account</button>
-</nav>
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <button class="btn btn-green" style="flex:1; padding:12px;" onclick="executeTrade('BUY')">MANUAL BUY</button>
+            <button class="btn btn-red" style="flex:1; padding:12px;" onclick="executeTrade('SELL')">MANUAL SELL</button>
+        </div>
+        <button class="btn btn-blue" style="width:100%; padding:12px;" onclick="toggleStockAlgo()">🤖 TOGGLE AI ALGO BOT</button>
+    </div>
+</div>
 
 <script>
-"use strict";
+    // Persistent Storage Setup
+    let db = JSON.parse(localStorage.getItem('khan_angel_terminal_v7')) || {
+        capital: 5000,
+        dailyPnl: 0,
+        positions: [],
+        orders: [],
+        history: [],
+        algos: []
+    };
 
-const $=id=>document.getElementById(id);
-const initial={
- capital:5000,startingCapital:5000,riskPerTrade:100,dailyLimit:200,maxPositions:3,
- positions:[],orders:[],history:[],language:"en",strategy:"EMA 9 / EMA 21"
-};
-let data;
-try{
- data=JSON.parse(localStorage.getItem("KHAN_APP_DATA"))||structuredClone(initial);
-}catch(e){data=structuredClone(initial)}
-const instruments={
- NIFTY:{price:24500,change:.42},
- BANKNIFTY:{price:52300,change:-.25},
- RELIANCE:{price:1450,change:.68},
- TCS:{price:3200,change:.31},
- INFY:{price:1550,change:-.42},
- SBIN:{price:780,change:.57},
- HDFCBANK:{price:1680,change:-.18},
- ITC:{price:410,change:.24}
-};
-let prices={};
-Object.keys(instruments).forEach(s=>prices[s]=instruments[s].price);
-let selectedSide="BUY";
-let activePage="home";
+    let currentNav = 'home';
+    let searchQuery = '';
+    let selectedAsset = null;
 
-function save(){
- localStorage.setItem("KHAN_APP_DATA",JSON.stringify(data));
-}
-function fmt(n){
- return "₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
-}
-function escapeHTML(s){
- return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
-function openPage(id){
- document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
- const target=$(id);
- if(!target)return;
- target.classList.add("active");
- document.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",b.dataset.page===id));
- activePage=id;
- closeSubs();
- renderAll();
- window.scrollTo({top:0,behavior:"instant"});
-}
-function openSub(id){
- closeSubs();
- const el=$(id);
- if(el)el.classList.remove("hidden");
- el?.scrollIntoView({behavior:"smooth",block:"start"});
-}
-function closeSubs(){
- ["settingsSub","languageSub","riskSub","strategySub","brokerSub","aboutSub"].forEach(id=>$(id).classList.add("hidden"));
-}
-function chooseSide(side){
- selectedSide=side;
- $("tradeSide").value=side;
- $("buyTab").classList.toggle("active",side==="BUY");
- $("sellTab").classList.toggle("active",side==="SELL");
-}
-function pnl(p){
- return (prices[p.symbol]-p.entry)*p.qty*(p.side==="BUY"?1:-1);
-}
-function totalOpen(){
- return data.positions.reduce((a,p)=>a+pnl(p),0);
-}
-function totalRealized(){
- return data.history.reduce((a,t)=>a+t.pnl,0);
-}
-function todayLoss(){
- return Math.max(0,-(totalOpen()+totalRealized()));
-}
-function placeTrade(){
- const symbol=$("tradeSymbol").value;
- const qty=Number($("tradeQty").value);
- const side=selectedSide;
- const sl=Number($("tradeSL").value)||0;
- const target=Number($("tradeTarget").value)||0;
- if(!Number.isInteger(qty)||qty<1){alert("Enter a valid quantity.");return;}
- if(data.positions.length>=data.maxPositions){alert("Maximum open positions reached.");return;}
- if(todayLoss()>=data.dailyLimit){alert("Daily loss limit reached. New trades are blocked.");return;}
- if(data.capital<=0){alert("Paper capital is exhausted.");return;}
- const price=prices[symbol];
- if(!price){alert("Invalid instrument.");return;}
- const position={id:Date.now()+Math.random(),symbol,side,qty,entry:price,sl,target,date:new Date().toLocaleString()};
- data.positions.push(position);
- data.orders.unshift({date:new Date().toLocaleString(),symbol,side,qty,price,status:"PAPER FILLED"});
- save();renderAll();
- alert("Paper order recorded at "+fmt(price)+". No real broker order was sent.");
-}
-function closePosition(id,reason="MANUAL EXIT"){
- const index=data.positions.findIndex(p=>String(p.id)===String(id));
- if(index<0)return;
- const p=data.positions[index],exit=prices[p.symbol];
- const result=(exit-p.entry)*p.qty*(p.side==="BUY"?1:-1);
- data.history.unshift({symbol:p.symbol,side:p.side,qty:p.qty,entry:p.entry,exit,pnl:result,date:new Date().toLocaleString(),reason});
- data.capital+=result;
- data.positions.splice(index,1);
- data.orders.unshift({date:new Date().toLocaleString(),symbol:p.symbol,side:"EXIT",qty:p.qty,price:exit,status:"PAPER CLOSED"});
- save();renderAll();
-}
-function renderMarket(){
- $("marketList").innerHTML=Object.keys(instruments).map(s=>{
- const ch=instruments[s].change;
- return `<div class="stockrow">
- <div><div class="stock-name">${s}</div><div class="stock-sub">NSE · Sample instrument</div></div>
- <div><div class="stock-price">${fmt(prices[s])}</div><div class="stock-change ${ch>=0?"green":"red"}">${ch>=0?"+":""}${ch}%</div></div>
- </div>`;
- }).join("");
-}
-function renderHome(){
- $("homeWatch").innerHTML=["NIFTY","BANKNIFTY","RELIANCE","TCS"].map
+    let indices = {
+        'NIFTY': { price: 25144.30, chg: '-155.05 (-0.61%)', expiry: 'Expiry Tomorrow' },
+        'SENSEX': { price: 81592.45, chg: '-318.56 (-0.39%)', expiry: 'Expiry Thu' },
+        'BANKNIFTY': { price: 61030.10, chg: '+112.40 (+0.18%)', expiry: 'Expiry Wed' }
+    };
+
+    let stocks = [
+        { sym: 'HORIZONIND', exch: 'NSE', p: 47.20, chg: '+0.79 (+1.70%)', tag: 'interested' },
+        { sym: 'KARURVYSYA', exch: 'NSE', p: 381.55, chg: '+0.95 (+0.25%)', tag: 'interested' },
+        { sym: 'SYLPH', exch: 'BSE', p: 0.22, chg: '0.00 (0.00%)', tag: 'interested' },
+        { sym: 'GVT&D', exch: 'NSE', p: 4420.00, chg: '+220.00 (+5.24%)', tag: 'mover' },
+        { sym: 'POLICYBZR', exch: 'NSE', p: 1105.00, chg: '+54.90 (+5.23%)', tag: 'mover' },
+        { sym: 'MCX', exch: 'NSE', p: 3720.00, chg: '+95.30 (+2.63%)', tag: 'mover' },
+        { sym: 'SMT', exch: 'NSE', p: 533.95, chg: '+29.30 (+5.81%)', tag: 'watch' },
+        { sym: 'CUPID', exch: 'NSE', p: 377.80, chg: '-7.00 (-1.82%)', tag: 'watch' },
+        { sym: 'UTLSOLAR', exch: 'NSE', p: 347.05, chg: '-7.95 (-2.24%)', tag: 'watch' },
+        { sym: 'RELIANCE', exch: 'NSE', p: 2985.50, chg: '+32.10 (+1.08%)', tag: 'watch' },
+        { sym: 'TCS', exch: 'NSE', p: 3920.00, chg: '-12.50 (-0.32%)', tag: 'watch' }
+    ];
+
+    function persist() {
+        localStorage.setItem('khan_angel_terminal_v7', JSON.stringify(db));
+    }
+
+    // Live Ticks & Exit Rules Engine
+    setInterval(() => {
+        Object.keys(indices).forEach(k => {
+            indices[k].price = +(indices[k].price + (Math.random() - 0.48) * 10).toFixed(2);
+        });
+
+        stocks.forEach(s => {
+            s.p = +(s.p * (1 + (Math.random() - 0.49) * 0.002)).toFixed(2);
+        });
+
+        // Evaluate Open Positions & 4 Exit Rules
+        for (let i = db.positions.length - 1; i >= 0; i--) {
+            let p = db.positions[i];
+            let found = stocks.find(x => x.sym === p.sym);
+            p.ltp = found ? found.p : Math.max(5, +(p.ltp + (Math.random() - 0.48) * 2).toFixed(2));
+            p.highPrice = Math.max(p.highPrice || p.avg, p.ltp);
+
+            let currentPnl = (p.ltp - p.avg) * p.qty;
+
+            // Trailing Stop Loss Rule
+            if (currentPnl > 25 && p.ltp > (p.avg + 2)) {
+                let newTrail = +(p.ltp - 2).toFixed(2);
+                if (newTrail > p.sl) p.sl = newTrail;
+            }
+
+            if (p.side === 'BUY') {
+                if (p.ltp >= p.target) closePosition(i, 'TARGET HIT 🎯');
+                else if (p.ltp <= p.sl) closePosition(i, 'STOP LOSS HIT 🛑');
+            } else {
+                if (p.ltp <= p.target) closePosition(i, 'TARGET HIT 🎯');
+                else if (p.ltp >= p.sl) closePosition(i, 'STOP LOSS HIT 🛑');
+            }
+        }
+
+        // Run Algorithmic Bots
+        db.algos.forEach(a => {
+            if (!a.active) return;
+            if (db.positions.some(x => x.sym === a.sym)) return;
+
+            let st = stocks.find(x => x.sym === a.sym);
+            let lp = st ? st.p : 100;
+            let cost = lp * a.qty;
+
+            if (Math.random() < 0.15 && db.capital >= cost && db.dailyPnl > -200) {
+                db.capital = +(db.capital - cost).toFixed(2);
+                db.positions.push({
+                    sym: a.sym,
+                    side: 'BUY',
+                    qty: a.qty,
+                    avg: lp,
+                    ltp: lp,
+                    highPrice: lp,
+                    target: +(lp * 1.04).toFixed(2),
+                    sl: +(lp * 0.98).toFixed(2),
+                    mode: 'AI Algo'
+                });
+                db.orders.unshift({ time: new Date().toLocaleTimeString(), sym: a.sym, side: 'BUY', qty: a.qty, price: lp, status: 'EXECUTED (Algo)' });
+                persist();
+            }
+        });
+
+        // Daily Loss Limit (₹200)
+        if (db.dailyPnl <= -200 && db.positions.length > 0) {
+            db.positions = [];
+            alert('Daily Loss Limit of ₹200 reached! All positions auto-closed.');
+            persist();
+        }
+
+        renderTicker();
+        if (currentNav === 'home' || currentNav === 'watchlist' || currentNav === 'portfolio') renderMain();
+    }, 1500);
+
+    function initApp() {
+        renderTicker();
+        switchNav('home');
+    }
+
+    function renderTicker() {
+        let bar = document.getElementById('tickerScroll');
+        if (!bar) return;
+        let h = '';
+        Object.keys(indices).forEach(k => {
+            h += `
+                <div class="ticker-card" onclick="switchNav('options')">
+                    <div class="ticker-title"><span>${k}</span><span style="color:#0ECB81;">Live</span></div>
+                    <div class="ticker-val up">₹${indices[k].price.toLocaleString('en-IN')}</div>
+                    <div style="font-size:10px; color:#F6465D; margin-top:2px;">${indices[k].chg}</div>
+                </div>
+            `;
+        });
+        bar.innerHTML = h;
+    }
+
+    function switchNav(nav) {
+        currentNav = nav;
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        let el = document.getElementById('nav-' + nav);
+        if (el) el.classList.add('active');
+        renderMain();
+    }
+
+    function handleSearch(val) {
+        searchQuery = val;
+        if (currentNav !== 'watchlist' && currentNav !== 'home') switchNav('watchlist');
+        else renderMain();
+    }
+
+    function openModal(sym, price) {
+        selectedAsset = { sym, price };
+        document.getElementById('mSym').innerText = sym;
+        document.getElementById('mPrice').innerText = 'LTP: ₹ ' + price.toFixed(2);
+        document.getElementById('mCapDisplay').innerText = db.capital.toLocaleString('en-IN');
+        document.getElementById('mQty').value = Math.max(1, Math.ceil(500 / price));
+        document.getElementById('mTarget').value = +(price * 1.04).toFixed(2);
+        document.getElementById('mSL').value = +(price * 0.98).toFixed(2);
+        calcCost();
+        document.getElementById('tradeModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('tradeModal').style.display = 'none';
+    }
+
+    function calcCost() {
+        if (!selectedAsset) return;
+        let q = parseInt(document.getElementById('mQty').value) || 1;
+        let cost = +(selectedAsset.price * q).toFixed(2);
+        document.getElementById('mCost').innerText = '₹ ' + cost.toLocaleString('en-IN');
+    }
+
+    function executeTrade(side) {
+        if (db.dailyPnl <= -200) {
+            alert('Daily Loss Limit reached! Trading blocked.');
+            closeModal();
+            return;
+        }
+        let q = parseInt(document.getElementById('mQty').value) || 1;
+        let cost = +(selectedAsset.price * q).toFixed(2);
+        let target = parseFloat(document.getElementById('mTarget').value);
+        let sl = parseFloat(document.getElementById('mSL').value);
+
+        if (cost > db.capital) { alert('Insufficient capital!'); return; }
+
+        db.capital = +(db.capital - cost).toFixed(2);
+        db.positions.push({
+            sym: selectedAsset.sym,
+            side: side,
+            qty: q,
+            avg: selectedAsset.price,
+            ltp: selectedAsset.price,
+            highPrice: selectedAsset.price,
+            target: target,
+            sl: sl,
+            mode: 'Manual'
+        });
+
+        db.orders.unshift({
+            time: new Date().toLocaleTimeString(),
+            sym: selectedAsset.sym,
+            side: side,
+            qty: q,
+            price: selectedAsset.price,
+            status: 'EXECUTED'
+        });
+
+        persist();
+        closeModal();
+        switchNav('portfolio');
+    }
+
+    function toggleStockAlgo() {
+        let sym = selectedAsset.sym;
+        let ex = db.algos.find(x => x.sym === sym);
+        if (ex) { ex.active = !ex.active; }
+        else { db.algos.push({ sym: sym, qty: parseInt(document.getElementById('mQty').value) || 1, active: true }); }
+        persist();
+        closeModal();
+        alert(`AI Algo Bot toggled for ${sym}!`);
+        switchNav('portfolio');
+    }
+
+    function closePosition(idx, reason) {
+        let p = db.positions[idx];
+        let pnl = p.side === 'BUY' ? (p.ltp - p.avg) * p.qty : (p.avg - p.ltp) * p.qty;
+        let refund = (p.avg * p.qty) + pnl;
+
+        db.capital = +(db.capital + refund).toFixed(2);
+        db.dailyPnl = +(db.dailyPnl + pnl).toFixed(2);
+
+        db.history.unshift({
+            time: new Date().toLocaleTimeString(),
+            sym: p.sym,
+            qty: p.qty,
+            inP: p.avg,
+            outP: p.ltp,
+            pnl: +pnl.toFixed(2),
+            reason: reason
+        });
+
+        db.positions.splice(idx, 1);
+        persist();
+        renderMain();
+    }
+
+    function renderMain() {
+        let screen = document.getElementById('mainScreen');
+        let filtered = stocks.filter(s => s.sym.toLowerCase().includes(searchQuery.toLowerCase()));
+
+        if (currentNav === 'home') {
+            let h = `
+                <div style="background:linear-gradient(135deg, #1E232F, #181D27); margin:10px 14px; padding:12px; border-radius:8px; border:1px solid #2B3139; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-size:13px; font-weight:700;">Get a loan of upto ₹10 lakhs instantly!</div>
+                        <div style="font-size:11px; color:#3861FB; margin-top:2px; cursor:pointer;" onclick="alert('Loan Request Submitted (Demo)')">Check Offer ></div>
+                    </div>
+                    <div style="font-size:22px;">🏦</div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 14px; margin-bottom:12px;">
+                    <div style="background:#181D27; padding:10px; border-radius:8px; border:1px solid #262D3D; cursor:pointer;" onclick="alert('Rewards & Offers Active')">
+                        <div style="font-size:16px;">🎁</div>
+                        <div style="font-size:12px; font-weight:700; margin-top:4px;">Rewards and Offers</div>
+                    </div>
+                    <div style="background:#181D27; padding:10px; border-radius:8px; border:1px solid #262D3D; cursor:pointer;" onclick="alert('Referral Link Copied!')">
+                        <div style="font-size:16px;">🔗</div>
+                        <div style="font-size:12px; font-weight:700; margin-top:4px;">Refer and Earn ₹4500</div>
+                    </div>
+                </div>
+
+                <div class="section-title"><span>Stocks You're Interested In</span><span style="color:#3861FB;
