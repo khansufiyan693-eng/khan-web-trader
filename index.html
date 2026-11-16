@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KHAN AI TRADER</title>
+    <style>
+        * { box-sizing: border-box; font-family: sans-serif; }
+        body { margin: 0; background: #0B0E14; color: #FFF; padding: 15px; }
+        .card { background: #181D27; padding: 15px; border-radius: 8px; border: 1px solid #262D3D; margin-bottom: 12px; }
+        .btn { background: #3861FB; color: #FFF; border: none; padding: 10px 15px; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 8px; }
+        .up { color: #0ECB81; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>KHAN AI TRADER PRO</h2>
+        <p style="color: #848E9C;">Status: Live Paper Terminal Connected</p>
+        <div class="up" id="livePrice">NIFTY: ₹ 25,144.30</div>
+        <button class="btn" onclick="alert('Paper Buy Order Placed Successfully!')">BUY RELIANCE (₹2,985)</button>
+    </div>
+
+<script>
+    setInterval(() => {
+        let p = 25144 + (Math.random() * 10 - 5);
+        document.getElementById('livePrice').innerText = 'NIFTY: ₹ ' + p.toFixed(2);
+    }, 1500);
+</script>
+
+</body>
+</html>
