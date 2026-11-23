@@ -1,0 +1,89 @@
+name: Build KHAN AI TRADER V22 APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK
+        run: |
+          sdkmanager 'platform-tools' 'platforms;android-35' 'build-tools;35.0.0'
+
+      - name: Prepare Android Project
+        run: |
+          mkdir -p app/src/main/assets
+          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/xml
+          mkdir -p app/src/main/java/com/khanaitrader/app
+
+          test -f AndroidManifest.xml
+          test -f MainActivity.java
+          test -f index.html
+          test -f styles.xml
+
+          cp AndroidManifest.xml app/src/main/
+          cp MainActivity.java app/src/main/java/com/khanaitrader/app/
+          cp index.html app/src/main/assets/
+          cp persistence.js app/src/main/assets/
+
+          cp styles.xml app/src/main/res/values/
+          cp backup_rules.xml app/src/main/res/xml/
+          cp data_extraction_rules.xml app/src/main/res/xml/
+
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'com.khanaitrader.app'
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId 'com.khanaitrader.app'
+                  minSdk 23
+                  targetSdk 35
+                  versionCode 22
+                  versionName '22.0'
+              }
+          }
+          EOF
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build APK
+        run: gradle --no-daemon clean :app:assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: KHAN-AI-TRADER-V22-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
